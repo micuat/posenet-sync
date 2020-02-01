@@ -15,6 +15,7 @@ app.use(express.static('public'));
 // Chatroom
 
 var numUsers = 0;
+var messageHistory = [];
 
 io.on('connection', function (socket) {
   var addedUser = false;
@@ -23,6 +24,10 @@ io.on('connection', function (socket) {
   socket.on('new message', function (data) {
     // we tell the client to execute 'new message'
     socket.broadcast.emit('new message', {
+      username: socket.username,
+      message: data
+    });
+    messageHistory.push({
       username: socket.username,
       message: data
     });
@@ -44,6 +49,11 @@ io.on('connection', function (socket) {
       username: socket.username,
       numUsers: numUsers
     });
+    
+    for(const message of messageHistory) {
+      socket.emit('new message', message);
+    }
+
   });
 
   // when the client emits 'typing', we broadcast it to others
