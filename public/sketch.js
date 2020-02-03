@@ -1,13 +1,12 @@
 // Naoto Hieda
 // https://creativecommons.org/licenses/by-sa/3.0/
 
-const replayMode = true;
-
 function midiToFreq(m) {
   let tuning = 440;
   return Math.pow(2, (m - 69) / 12) * tuning;
 }
 
+let replayMode = false;
 let setColorMode = 0;
 
 class ColorScheme {
@@ -88,538 +87,7 @@ EasingFunctions = {
 const width = 400;
 const height = 400;
 
-class Drawer {
-  constructor({ c, args }) {
-    this.c = c;
-    if (args == undefined) {
-      args = {};
-    }
-    if (args.col == undefined) {
-      args.col = { bg: Math.floor(Math.random() * 5), fg: Math.floor(Math.random() * 5) };
-      if (args.col.bg == args.col.fg) args.col.fg = (args.col.fg + 2) % 5;
-    }
-    if (args.sides == undefined) {
-      args.sides = Math.floor(Math.random() * 3);
-      args.rand = [];
-      for (let i = 0; i < 8; i++) {
-        args.rand.push(Math.random());
-      }
-    }
-    this.args = args;
-  }
-  draw({ pg, args }) {
-    pg.push();
-    if (typeof this.c === 'object') {
-      this.c.draw(pg, { ...this.args, ...args });
-    }
-    pg.pop();
-  }
-}
-
-class LayerGraphics {
-  constructor({ p, pgF, pgB }) {
-    this.p = p;
-    this.pgF = pgF == undefined ? p.createGraphics(width, height, p.WEBGL) : pgF;
-    this.pgB = pgB == undefined ? p.createGraphics(width, height, p.WEBGL) : pgB;
-
-    this.bangT = 0;
-    this.bangDur = 0.75;
-    this.bangCycle = 0;
-    this.bangParam = 0;
-    this.bangTween = 0;
-  }
-
-  bang({ t }) {
-    this.bangT = t;
-    this.bangParam = Math.floor(Math.random() * 4);
-    this.bangCycle = (this.bangCycle + 1) % 2;
-  }
-
-  update({ t }) {
-    let p = this.p;
-    this.bangTween = p.constrain((t - this.bangT) / this.bangDur, 0, 1);
-  }
-}
-
-class WipeDelayGraphics extends LayerGraphics {
-  constructor({ p, pgF, pgB, fore, back, wipe, switcherCallback }) {
-    const vert = `
-#ifdef GL_ES
-precision highp float;
-precision highp int;
-#endif
-// attributes, in
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-attribute vec2 aTexCoord;
-attribute vec4 aVertexColor;
-
-// attributes, out
-varying vec3 var_vertPos;
-varying vec4 var_vertCol;
-varying vec3 var_vertNormal;
-varying vec2 var_vertTexCoord;
-
-// matrices
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
-uniform mat3 uNormalMatrix;
-
-void main() {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0);
-
-  // just passing things through
-  var_vertPos      = aPosition;
-  var_vertCol      = aVertexColor;
-  var_vertNormal   = aNormal;
-  var_vertTexCoord = aTexCoord;
-}
-`;
-    const frag = `
-#ifdef GL_ES
-precision highp float;
-precision highp int;
-#endif
-
-uniform float time;
-uniform vec4 col;
-//uniform vec2 center;   
-uniform vec2 resolution;
-uniform sampler2D ppixelsR;
-uniform sampler2D ppixelsG;
-uniform sampler2D ppixelsB;
-uniform sampler2D ppixelsM;
-varying vec2 vTexCoord;
-
-void main( void ) {
-  vec2 uv = gl_FragCoord.xy / resolution.xy;//vTexCoord;
-  // uv.y = 1.0 - uv.y;
-
-  vec4 colR = texture2D(ppixelsR, uv);
-  vec4 colG = texture2D(ppixelsG, uv);
-  vec4 colB = texture2D(ppixelsB, uv);
-  vec4 colM = texture2D(ppixelsM, uv);
-
-  gl_FragColor = colR * colM.r + colG * colM.g + colB * colM.b;
-
-}
-`;
-    super({ p, pgF, pgB });
-    this.pgMask = p.createGraphics(width, height, p.WEBGL);
-    this.pgM = p.createGraphics(width, height, p.WEBGL);
-    this.foreDraw = fore;
-    this.backDraw = back;
-    this.wipeDraw = wipe;
-    this.next = undefined;
-    this.nextWipe = undefined;
-    this.bangDur = 2;
-    this.switcherCallback = switcherCallback;
-    this.pShader = new p5.Shader(p._renderer, vert, frag);
-    // this.lastUpdateFrame = -1;
-  }
-
-  bang({ t, next, wipe }) {
-    this.next = next;
-    this.nextWipe = wipe;
-    // super.bang({ t });
-    this.bangT = t;
-  }
-
-  update({ t }) {
-    let p = this.p;
-    // if (p.frameCount <= this.lastUpdateFrame) {
-    //   return;
-    // }
-    // this.lastUpdateFrame = p.frameCount;
-    super.update({ t });
-
-    if (this.next != undefined && this.bangTween >= 0.5) {
-      this.bangParam = Math.floor(Math.random() * 4);
-      this.bangCycle = (this.bangCycle + 1) % 2;
-      if (this.wipeDraw.c.isWipe) {
-        this.foreDraw = this.backDraw;
-        this.backDraw = this.next;
-      }
-      this.next = undefined;
-
-      this.wipeDraw = this.nextWipe;
-      this.nextWipe = undefined;
-      this.switcherCallback();
-    }
-
-    setColorMode = 0;
-    this.backDraw.draw({ pg: this.pgB });
-    this.foreDraw.draw({ pg: this.pgF });
-    setColorMode = 2;
-    let tw = 0;
-    if (this.bangTween < 0.5) {
-      tw = this.bangTween + 0.5;
-    }
-    else {
-      tw = this.bangTween - 0.5;
-    }
-    let args = { tw, bangParam: this.bangParam };
-    this.pgMask.push();
-    this.wipeDraw.draw({ pg: this.pgMask, args });
-    this.pgMask.pop();
-    setColorMode = 0;
-  }
-
-  draw({ pg }) {
-    const p = this.p;
-
-    this.pShader.setUniform("ppixelsR", this.pgF);
-    this.pShader.setUniform("ppixelsG", this.pgM);
-    this.pShader.setUniform("ppixelsB", this.pgB);
-    this.pShader.setUniform("ppixelsM", this.pgMask);
-    this.pShader.setUniform("resolution", [width * p.pixelDensity(), height * p.pixelDensity()]);
-    pg.push();
-    pg.shader(this.pShader);
-    pg.noStroke();
-    pg.fill(255);
-    pg.rect(-width / 2, -height / 2, width, height);
-    pg.resetShader();
-    pg.pop();
-  }
-}
-
-class ClockWipe {
-  constructor({ p }) {
-    this.p = p;
-    this.isWipe = true;
-    this.name = 'ClockWipe';
-  }
-  draw(pg, args) {
-    const p = this.p
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    setColor(pg, 'background', col.bg);
-    // pg.translate(pg.width / 2, pg.height / 2);
-    pg.noStroke();
-    let rate0 = 0;
-    let rate1 = 0;
-    let r1 = pg.width / 2;
-    let rMax = pg.width * 2;
-    let rr = 0;
-    // if (rand[4] < 0.5) {
-    //   r1 = pg.width * 2;
-    // }
-    let halfRate = col.mg == undefined ? 1 / 2 : 1 / 3;
-    const halfRateDiv = Math.floor(rand[0] * 5 + 1);
-    halfRate /= halfRateDiv;
-    if (rand[3] < 0.5) {
-      this.isWipe = true;
-    }
-    else {
-      this.isWipe = false;
-    }
-    if (tw <= 0.5) {
-      const etw = EasingFunctions.easeInOutCubic(tw * 2);
-      rate0 = etw * halfRate * 2;
-      rate1 = etw * halfRate;
-    }
-    else {
-      const etw = EasingFunctions.easeInOutCubic(tw * 2 - 1);
-      if (this.isWipe) {
-        rate0 = p.map(etw, 0, 1, 2 * halfRate, 1);
-        rate1 = p.map(etw, 0, 1, 1 * halfRate, 1);
-        r1 = p.map(etw, 0, 1, r1, rMax);
-      }
-      else {
-        if (rand[5] < 0.5) {
-          rate0 = p.map(etw, 0, 1, 2 * halfRate, 0);
-          rate1 = p.map(etw, 0, 1, 1 * halfRate, 0);
-        }
-        else {
-          rate0 = 2 * halfRate;
-          rate1 = 1 * halfRate;
-          rr = p.map(etw, 0, 1, 0, 1);
-        }
-      }
-    }
-    function drawArc(r0, r1, rate) {
-      const n = 64;
-      const sign = bangParam % 2 == 0 ? -1 : 1;
-      pg.beginShape(p.TRIANGLE_STRIP);
-      for (let i = 0; i <= n; i++) {
-        let theta = sign * i / n * Math.PI * 2 * rate - Math.PI / 2;
-        let x = r0 * Math.cos(theta);
-        let y = r0 * Math.sin(theta);
-        pg.vertex(x, y);
-        x = r1 * Math.cos(theta);
-        y = r1 * Math.sin(theta);
-        pg.vertex(x, y);
-      }
-      pg.endShape();
-    }
-    const N = Math.floor(4 * rand[1]);
-    const M = Math.floor(rand[6] * halfRateDiv + 1);
-    for (let i = 0; i <= N; i++) {
-      const R1 = p.map(i, 0, N + 1, 0, r1);
-      const R0 = p.lerp(p.map(i - 1, 0, N + 1, 0, r1), R1, rr);
-      for (let j = 0; j < M; j++) {
-        pg.push();
-        pg.rotate((i + j) * halfRate * Math.PI * 4 - ((i * 0.25 + 1) * p.millis() * 0.001 + rand[2]) * Math.PI * 0.25);
-        if (col.mg != undefined) {
-          setColor(pg, 'fill', col.mg);
-          drawArc(R0, R1, rate0);
-        }
-        pg.rotate(halfRate * Math.PI * 4);
-        setColor(pg, 'fill', col.fg);
-        drawArc(R0, R1, rate1);
-        pg.pop();
-      }
-    }
-    pg.pop();
-  }
-}
-
-class ShapeExpand {
-  constructor({ p }) {
-    this.p = p;
-    this.isWipe = true;
-    this.name = 'ShapeExpand';
-  }
-  draw(pg, args) {
-    const p = this.p;
-    const t = p.millis() * 0.001;
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    setColor(pg, 'background', col.bg);
-    // pg.translate(pg.width / 2, pg.height / 2);
-    const draw = (R) => {
-      pg.push();
-      const n = [3, 4, 5, 6, 8][Math.floor(rand[1] * 5)];
-      pg.rotate((EasingFunctions.easeInOutCubic(t % 1) + Math.floor(t)) * Math.PI / n);
-      pg.noStroke();
-      let r = R;
-      if (rand[0] < 0.5) {
-        this.isWipe = false;
-      }
-      else {
-        this.isWipe = true;
-      }
-      if (tw < 0.5) {
-        r *= p.map(EasingFunctions.easeInOutCubic(tw * 2), 0, 1, 0, 0.25);
-      }
-      else {
-        if (rand[0] < 0.5) {
-          r *= p.map(EasingFunctions.easeInOutCubic(tw * 2 - 1), 0, 1, 0.25, 0);
-        }
-        else {
-          r *= p.map(EasingFunctions.easeInOutCubic(tw * 2 - 1), 0, 1, 0.25, 1);
-        }
-      }
-      pg.beginShape();
-      for (let i = 0; i <= n; i++) {
-        let theta = i / n * Math.PI * 2 - Math.PI / 2;
-        let x = r * Math.cos(theta);
-        let y = r * Math.sin(theta);
-        pg.vertex(x, y);
-      }
-      pg.endShape(p.CLOSE);
-      pg.pop();
-    }
-    if (col.mg != undefined) {
-      setColor(pg, 'fill', col.mg);
-      draw(pg.width * 1.42 * 1.2);
-    }
-    setColor(pg, 'fill', col.fg);
-    draw(pg.width * 1.42);
-    pg.pop();
-  }
-}
-
-class ParticleMove {
-  constructor({ p }) {
-    this.p = p;
-    this.isWipe = false;
-    this.name = 'ParticleMove';
-  }
-  draw(pg, args) {
-    const p = this.p;
-    const t = p.millis() * 0.001;
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    pg.noStroke();
-    if (rand[0] < 0.5) {
-      this.isWipe = false;
-    }
-    else {
-      this.isWipe = true;
-    }
-    setColor(pg, 'background', col.bg);
-    let tween = 0;
-    if (tw < 0.5) {
-      tween = EasingFunctions.easeInOutCubic(tw * 2);
-    }
-    else {
-      tween = p.map(EasingFunctions.easeInOutCubic(tw * 2 - 1), 0, 1, 1, 0);
-    }
-    const draw = (phase) => {
-      let r = width * 0.03;
-      if (rand[0] < 0.5) {
-      }
-      else {
-        if (tw >= 0.5) {
-          r = p.map(EasingFunctions.easeInOutCubic(tw * 2 - 1), 0, 1, r, width * 2);
-        }
-      }
-      const n = 64;
-      for (let i = 0; i < n; i++) {
-        const R = width * (0.4 + phase * 0.1);
-        let X, Y;
-        if (rand[1] < 1 / 3) {
-          const theta = (i / n * 2 + t / n * 16 + phase) * Math.PI;
-          X = R * Math.cos(theta);
-          Y = R * Math.sin(theta);
-        }
-        else if (rand[1] < 2 / 3) {
-          const theta = (i / n * 2 + phase) * Math.PI;
-          X = R * Math.cos(theta);
-          Y = R * 0.5 * (Math.random() - 0.5);
-        }
-        else {
-          const theta = (i / n * 2 + phase) * Math.PI;
-          X = R * Math.cos(theta);
-          Y = R * 0.5 * Math.sin((X / R + t) * Math.PI);
-        }
-        const x = p.lerp(0, X, tween);
-        const y = p.lerp(0, Y, tween);
-        pg.ellipse(x, y, r, r);
-      }
-    }
-    if (col.mg != undefined) {
-      setColor(pg, 'fill', col.mg);
-      draw(0.5);
-    }
-    setColor(pg, 'fill', col.fg);
-    draw(0);
-    pg.pop();
-  }
-}
-
-class CircleGridMove {
-  constructor({ p }) {
-    this.p = p;
-    this.name = 'CircleGridMove';
-  }
-  draw(pg, args) {
-    const p = this.p;
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    setColor(pg, 'background', col.bg);
-    setColor(pg, 'fill', col.fg);
-    pg.noStroke();
-    const n = sides + 1;
-    const r = pg.width / n / 4;
-    const t = p.millis() * 0.001;
-    // pg.translate(pg.width / 2, pg.height / 2);
-    pg.rotate(sides * Math.PI / 4);
-    for (let j = -n - 1; j <= n + 1; j++) {
-      const sj = rand[0] > 0.5 ? (j + n + 1) / (2 * n + 2) : 0;
-      const tww = p.constrain(p.map(t % 1, 0, 1 - sj, 0, 1), 0, 1);
-      const dt = EasingFunctions.easeInOutCubic(tww) * pg.width / 2 / n;
-      for (let i = -n - 1; i <= n + 1; i++) {
-        pg.push();
-        const dx = (i + n + 1) % 2 == Math.floor(t) % 2 ? dt : 0;
-        pg.translate(pg.width / 2 / n * j + dx, pg.width / 2 / n * i);
-        pg.ellipse(0, 0, r, r);
-        pg.pop();
-      }
-    }
-    pg.pop();
-  }
-}
-
-class SquareGridRotate {
-  constructor({ p }) {
-    this.p = p;
-    this.name = 'SquareGridRotate';
-  }
-  draw(pg, args) {
-    const p = this.p
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    const n = sides + 1;
-    const r = pg.width / n / 4 * Math.sqrt(2);
-
-    const t = p.millis() * 0.001;
-    if ((t + 1) % 4 < 2) {
-      setColor(pg, 'background', col.bg);
-      setColor(pg, 'fill', col.fg);
-    }
-    else {
-      setColor(pg, 'background', col.fg);
-      setColor(pg, 'fill', col.bg);
-      pg.translate(pg.width / 2 / n * 0.5, pg.width / 2 / n * 0.5);
-    }
-    pg.noStroke();
-    pg.rectMode(p.CENTER);
-    // pg.translate(pg.width / 2, pg.height / 2);
-    for (let i = -n; i <= n; i++) {
-      for (let j = -n; j <= n; j++) {
-        pg.push();
-        pg.translate(pg.width / 2 / n * j, pg.width / 2 / n * i);
-        pg.rotate((EasingFunctions.easeInOutQuint(t % 1) + Math.floor(t)) / 4 * Math.PI);
-        pg.rect(0, 0, r, r);
-        pg.pop();
-      }
-    }
-    pg.pop();
-  }
-}
-
-class SquareGrid {
-  constructor({ p }) {
-    this.p = p;
-    this.name = 'SquareGrid';
-  }
-  draw(pg, args) {
-    const p = this.p
-    const { col, sides, rand, tw, bangParam } = args;
-    pg.push();
-    const n = sides + 1;
-    const r = pg.width / n / 4 * Math.sqrt(2);
-
-    const t = p.millis() * 0.001;
-    setColor(pg, 'background', col.bg);
-    setColor(pg, 'fill', col.fg);
-    pg.noStroke();
-    pg.rectMode(p.CENTER);
-    // pg.translate(pg.width / 2, pg.height / 2);
-    pg.rotate(Math.PI / 2 * sides);
-    for (let j = -n - 1; j <= n + 1; j++) {
-      const sj = rand[0] > 0.5 ? (j + n + 1) / (2 * n + 2) : 0;
-      const tww = p.constrain(p.map(t % 1, 0, 1 - sj, 0, 1), 0, 1);
-      const dt = EasingFunctions.easeInOutCubic(tww) * pg.width / 2 / n;
-      for (let i = -n - 1; i <= n + 1; i++) {
-        pg.push();
-        const dx = (i + n + 1) % 2 == Math.floor(t) % 2 ? dt : 0;
-        pg.translate(pg.width / 2 / n * j + dx, pg.width / 2 / n * i);
-        pg.rotate(Math.PI / 4 * sides);
-        pg.rect(0, 0, r, r);
-        pg.pop();
-      }
-    }
-    pg.pop();
-  }
-}
-
 const s = (p) => {
-  const wipeDraws = [
-    // new ClockWipe({ p }),
-    // new ShapeExpand({ p }),
-    new ParticleMove({ p }),
-  ];
-  let solidDraws = [
-    // new SquareGrid({ p }),
-    // new CircleGridMove({ p }),
-    new SquareGrid({ p }),
-    new CircleGridMove({ p }),
-    new SquareGridRotate({ p }),
-    new SquareGrid({ p }),
-  ];
   const synths = {};
   const feedbackLoop = new FeedbackLoop();
 
@@ -633,11 +101,6 @@ const s = (p) => {
 
   let codeBase = 'n';
   let pastCommands = [];
-
-  let wipe0;
-  let turn;
-
-  let diffDrawer;
 
   const history = [];
   const savedHistory = [
@@ -657,22 +120,8 @@ const s = (p) => {
   let curHistory = 0;
 
   p.setup = () => {
-    p.createCanvas(width, height, p.WEBGL);
+    p.noCanvas();
     p.frameRate(60);
-
-    wipe0 = new WipeDelayGraphics({
-      p,
-      switcherCallback: p.switcherCallback,
-      fore: new Drawer({ c: solidDraws[1] }),
-      back: new Drawer({ c: solidDraws[0] }),
-      wipe: new Drawer({
-        c: wipeDraws[0], args: { col: { bg: 0, fg: 2, mg: 1 } }
-      })
-    });
-
-    turn = wipe0;
-
-    diffDrawer = new Drawer({ c: solidDraws[2] });
 
     synths['~'] = new Tone.Synth({
       oscillator: { type: 'triangle' }
@@ -699,43 +148,24 @@ const s = (p) => {
   }
 
   p.mouseClicked = () => {
-    runButtonClicked();
+    p.runButtonClicked('');
   }
 
   let node;
   let curPattern = 0;
   let curDraw = 0;
 
-  p.switcherCallback = () => {
-    diffDrawer = new Drawer({ c: solidDraws[Math.floor(solidDraws.length * Math.random())] });
-  }
   p.draw = () => {
     let t = p.millis() * 0.001;
 
     if (isPlaying) {
-      freqLerped = p.lerp(freqLerped, freq, 0.3);
       if (pointer < tokens.length) {
-        if (p.frameCount % 4 == 0) {
           lastNode = node;
           node = tokens[pointer];
           execute(node);
-        }
       } else {
         isPlaying = false;
         if (replayMode) {
-          curPattern = (curPattern + 1) % wipeDraws.length;
-          curDraw = (curDraw + 1) % solidDraws.length;
-          turn = wipe0;
-          next = new Drawer({ c: solidDraws[curDraw] })
-          wipe0.bang({
-            t, next,
-            wipe: new Drawer({
-              c: wipeDraws[curPattern],
-              args: {
-                col: { bg: 0, fg: 2, mg: Math.random() > 0.5 ? 1 : undefined }
-              }
-            })
-          });
           setTimeout(() => {
             curHistory++;
             if (curHistory < savedHistory.length) {
@@ -764,22 +194,10 @@ const s = (p) => {
 
     const dt = -Math.cos(t * Math.PI * 0.5) * 0.5 + 0.5;
     const du = -Math.cos(t * Math.PI * 0.1) * 0.5 + 0.5;
-
-    turn.freq = freq;
-    turn.update({ t });
-
-    diffDrawer.draw({ pg: turn.pgM });
-
-    p.background(0);
-    turn.draw({ pg: p });
-    // p.image(turn.pgF, -width / 2, -height / 2, width / 2, height / 2);
-    // p.image(turn.pgB, -width / 2, 0, width / 2, height / 2);
-    // p.image(turn.pgM, 0, -height / 2, width / 2, height / 2);
-    // p.image(turn.pgMask, 0, -height / 2, width / 2, height / 2);
   }
 
   let isSetup = false;
-  let runButtonClicked = () => {
+  p.runButtonClicked = (code) => {
     isPlaying = true;
     if (isSetup == false) {
       feedbackLoop.setup();
@@ -789,22 +207,9 @@ const s = (p) => {
       }
       isSetup = true;
     }
-    let code;
-    if (replayMode) {
-      code = savedHistory[curHistory];
-    }
-    else {
-      code = codeInput.value();
-    }
     let unbalancedBrackets = (code.split("<").length - 1) - (code.split(">").length - 1);
     if (unbalancedBrackets > 0) {
       code += '>'.repeat(unbalancedBrackets);
-    }
-    if (replayMode == false) {
-      if (history.length == 0 || history[history.length - 1] != code) {
-        history.push(code);
-        console.log(history);
-      }
     }
     code = unpack(code);
 
