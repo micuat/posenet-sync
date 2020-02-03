@@ -242,6 +242,7 @@ $(function() {
   // Whenever the server emits 'new message', update the chat body
   socket.on('new message', function (data) {
     addChatMessage(data);
+    myp5.runButtonClicked(data.message);
   });
 
   // Whenever the server emits 'user joined', log it in the chat body

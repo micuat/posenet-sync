@@ -102,23 +102,6 @@ const s = (p) => {
   let codeBase = 'n';
   let pastCommands = [];
 
-  const history = [];
-  const savedHistory = [
-    "<<<30f=n=>>>",
-    "<<<30f=n=>d>b>",
-    "<<<<30f=n=>d>>b>",
-    "<<<<30f=n=>d>>b>d<<<31p===>>>b",
-    "<<<<30f=n=>d>>b>d<<<31p=f=>>>b",
-    "<<<<30fff===nnn===>d>>b>d<<<31ppp===fff===>>>b",
-    "<<<30fff===nnn===>d>>b<<d<31ppp===fff===>b>>",
-    "<<<30fff===nnn===>d>>b<<<31mm==aa==>d<31[[[===fff===>b>>",
-    "<<<31mm==aa==>d<31[[[===fff===>b>>d<<<32NN=====>>>b",
-    "<<<31mm==aa==>d<31[[[===fff===>b>>d<<<32[[===>>>b",
-    "<<<31mm==aa==>d<31[[[===fff===>b>>d32<<<+2[[===>>>b",
-    "<<<31mm==aa==>d<31[[[===fff===>b>>d32<<<+2[[[<===>>>>b"
-  ];
-  let curHistory = 0;
-
   p.setup = () => {
     p.noCanvas();
     p.frameRate(60);
@@ -160,22 +143,13 @@ const s = (p) => {
 
     if (isPlaying) {
       if (pointer < tokens.length) {
-          lastNode = node;
           node = tokens[pointer];
           execute(node);
       } else {
         isPlaying = false;
-        if (replayMode) {
-          setTimeout(() => {
-            curHistory++;
-            if (curHistory < savedHistory.length) {
-              runButtonClicked();
-            }
-            else {
-              curHistory = 0;
-            }
-          }, 500);
-        }
+        setTimeout(() => {
+          p.runButtonClicked();
+        }, 500);
       }
     } else {
       for (const key in synths) {
