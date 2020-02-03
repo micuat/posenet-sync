@@ -3,7 +3,7 @@
 
 function midiToFreq(m) {
   let tuning = 440;
-  if(m > 120) return 0;
+  if(m > 120 || m <= 0) return Math.random() * midiToFreq(100);
   return Math.pow(2, (m - 69) / 12) * tuning;
 }
 
