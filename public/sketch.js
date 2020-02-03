@@ -149,7 +149,7 @@ const s = (p) => {
       } else {
         isPlaying = false;
         setTimeout(() => {
-          p.runButtonClicked();
+          // p.runButtonClicked();
         }, 500);
       }
     } else {
