@@ -174,6 +174,8 @@ const s = p => {
   let curPattern = 0;
   let curDraw = 0;
 
+  let curSound = 0;
+
   p.draw = () => {
     let t = p.millis() * 0.001;
 
@@ -184,7 +186,12 @@ const s = p => {
       } else {
         isPlaying = false;
         setTimeout(() => {
-          p.runButtonClicked(p.random(commandHistory));
+          if (commandHistory.length == 0) return;
+          let start = commandHistory.length - 4;
+          if (start < 0) start = 0;
+          if (start + curSound >= commandHistory.length) curSound = 0;
+          p.runButtonClicked(commandHistory[start + curSound]);
+          curSound++;
         }, 2000);
       }
     } else {
