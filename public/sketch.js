@@ -199,7 +199,7 @@ const s = p => {
             // if (li == undefined || li[0] == undefined || li.className == undefined) break;
             if (li[0].className == "message") messageCount++;
             count++;
-          } while (messageCount != start + curSound);
+          } while (messageCount <= start + curSound);
           if (li != undefined)
             li.stop().css({ backgroundColor: "#ff0000" }).animate(
               { backgroundColor: "#ffffff" },
