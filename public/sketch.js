@@ -191,8 +191,15 @@ const s = p => {
           if (start < 0) start = 0;
           if (start + curSound >= commandHistory.length) curSound = 0;
           p.runButtonClicked(commandHistory[start + curSound]);
-          $( `.messages li:nth-child(${start+curSound})` )
-            .css({backgroundColor: '#ff0000'})
+          let li;
+          let count = 0;
+          let messageCount = 0;
+          do {
+            li = $( `.messages .message:nth-child(${count})` )
+            if(li[0].className == 'message') messageCount++;
+            count++;
+          } while (messageCount < start + curSound)
+          li.css({backgroundColor: '#ff0000'})
             .animate({backgroundColor:'#ffffff'}, 1000)
           curSound++;
         }, 2000);
