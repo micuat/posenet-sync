@@ -191,7 +191,9 @@ const s = p => {
           if (start < 0) start = 0;
           if (start + curSound >= commandHistory.length) curSound = 0;
           p.runButtonClicked(commandHistory[start + curSound]);
-          $( `ul li:nth-child(${start+curSound})` ).
+          $( `.messages li:nth-child(${start+curSound})` )
+            .css({backgroundColor: '#ff0000'})
+            .animate({backgroundColor:'#ffffff'}, 1000)
           curSound++;
         }, 2000);
       }
