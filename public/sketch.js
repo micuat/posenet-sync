@@ -191,6 +191,7 @@ const s = p => {
           if (start < 0) start = 0;
           if (start + curSound >= commandHistory.length) curSound = 0;
           p.runButtonClicked(commandHistory[start + curSound]);
+          $( `ul li:nth-child(${start+curSound})` ).
           curSound++;
         }, 2000);
       }
