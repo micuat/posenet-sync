@@ -1,4 +1,5 @@
 /* global io */
+var commandHistory = [];
 
 $(function() {
   var FADE_TIME = 150; // ms
@@ -76,7 +77,7 @@ $(function() {
     var $el = $('<li>').addClass('log').text(message);
     addMessageElement($el, options);
   }
-
+  
   // Adds the visual chat message to the message list
   function addChatMessage (data, options) {
     // Don't fade the message in if there is an 'X was typing'
@@ -100,6 +101,7 @@ $(function() {
       .append($usernameDiv, $messageBodyDiv);
 
     addMessageElement($messageDiv, options);
+    commandHistory.push(data.message);
   }
 
   // Adds the visual chat typing message
