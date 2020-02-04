@@ -192,17 +192,21 @@ const s = p => {
           if (start + curSound >= commandHistory.length) curSound = 0;
           p.runButtonClicked(commandHistory[start + curSound]);
           let li;
-          let count = 0;
+          let count = 1;
           let messageCount = 0;
           do {
-            li = $( `.messages .message:nth-child(${count})` )
-            if(li[0].className == 'message') messageCount++;
+            li = $(`.messages li:nth-child(${count})`);
+            // if (li == undefined || li[0] == undefined || li.className == undefined) break;
+            if (li[0].className == "message") messageCount++;
             count++;
-          } while (messageCount < start + curSound)
-          li.css({backgroundColor: '#ff0000'})
-            .animate({backgroundColor:'#ffffff'}, 1000)
+          } while (messageCount != start + curSound);
+          if (li != undefined)
+            li.stop().css({ backgroundColor: "#ff0000" }).animate(
+              { backgroundColor: "#ffffff" },
+              1000
+            );
           curSound++;
-        }, 2000);
+        }, 200);
       }
     } else {
       for (const key in synths) {
