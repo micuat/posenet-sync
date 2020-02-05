@@ -206,7 +206,7 @@ const s = p => {
               1000
             );
           curSound++;
-        }, 200);
+        }, 2000);
       }
     } else {
       for (const key in synths) {
