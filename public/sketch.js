@@ -175,7 +175,7 @@ const s = p => {
   let curDraw = 0;
 
   let curSound = 0;
-
+  let waiting = false;
   p.draw = () => {
     let t = p.millis() * 0.001;
 
@@ -185,28 +185,32 @@ const s = p => {
         execute(node);
       } else {
         isPlaying = false;
-        setTimeout(() => {
-          if (commandHistory.length == 0) return;
-          let start = commandHistory.length - 4;
-          if (start < 0) start = 0;
-          if (start + curSound >= commandHistory.length) curSound = 0;
-          p.runButtonClicked(commandHistory[start + curSound]);
-          let li;
-          let count = 1;
-          let messageCount = 0;
-          do {
-            li = $(`.messages li:nth-child(${count})`);
-            // if (li == undefined || li[0] == undefined || li.className == undefined) break;
-            if (li[0].className == "message") messageCount++;
-            count++;
-          } while (messageCount <= start + curSound);
-          if (li != undefined)
-            li.stop().css({ backgroundColor: "#ff0000" }).animate(
-              { backgroundColor: "#ffffff" },
-              1000
-            );
-          curSound++;
-        }, 2000);
+
+        if (waiting == false) {
+          waiting = true;
+          setTimeout(() => {
+            waiting = false;
+            if (commandHistory.length == 0) return;
+            let start = commandHistory.length - 4;
+            if (start < 0) start = 0;
+            if (start + curSound >= commandHistory.length) curSound = 0;
+            p.runButtonClicked(commandHistory[start + curSound]);
+            let li;
+            let count = 1;
+            let messageCount = 0;
+            do {
+              li = $(`.messages li:nth-child(${count})`);
+              // if (li == undefined || li[0] == undefined || li.className == undefined) break;
+              if (li[0].className == "message") messageCount++;
+              count++;
+            } while (messageCount <= start + curSound);
+            if (li != undefined)
+              li.stop()
+                .css({ backgroundColor: "#ff0000" })
+                .animate({ backgroundColor: "#ffffff" }, 1000);
+            curSound++;
+          }, 2000);
+        }
       }
     } else {
       for (const key in synths) {
