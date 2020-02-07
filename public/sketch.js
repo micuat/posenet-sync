@@ -159,11 +159,6 @@ const s = p => {
     synths["p"] = new Tone.PluckSynth().toMaster();
     synths["m"] = new Tone.MetalSynth().toMaster();
     synths["n"] = new Tone.NoiseSynth().toMaster();
-
-    if (replayMode == false) {
-      codeInput = p.createInput(codeBase);
-      codeInput.size(p.width * 1.5);
-    }
   };
 
   p.mouseClicked = () => {
