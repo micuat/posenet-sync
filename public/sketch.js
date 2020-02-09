@@ -312,6 +312,7 @@ const s = p => {
   const execute = t => {
     if (t != prevChar) {
       if (isNaN(t)) {
+        console.log(t)
         switch (t) {
           case "~":
           case "a":
@@ -343,14 +344,14 @@ const s = p => {
             if (feedbackLoop.feedbackDelay) {
               // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.2, 1 / 60);
               // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.1, 1 / 60, 1 / 2);
-              // feedbackLoop.feedbackDelay.feedback.linearRampTo(0.7, 1 / 30);
+              feedbackLoop.feedbackDelay.feedback.linearRampTo(0.7, 1 / 30);
               feedbackLoop.amp = 0.5;
             }
             break;
           case "b":
             if (feedbackLoop.feedbackDelay) {
               // feedbackLoop.feedbackDelay.feedback.linearRampTo(1, 1 / 60);
-              // feedbackLoop.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
+              feedbackLoop.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
               feedbackLoop.amp = 0.0;
             }
             break;
@@ -408,7 +409,7 @@ class FeedbackLoop {
     if (this.isSetup) return;
 
     this.feedback = Tone.context.createScriptProcessor(this.bufferSize, 1, 1);
-    this.feedbackDelay = new Tone.FeedbackDelay(0.1, 0.7).connect(
+    this.feedbackDelay = new Tone.FeedbackDelay(0.1, 0.0).connect(
       this.feedback
     );
     this.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
