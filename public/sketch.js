@@ -312,8 +312,9 @@ const s = p => {
   const execute = t => {
     if (t != prevChar) {
       if (isNaN(t)) {
-        console.log(t)
         switch (t) {
+          case "💅":
+            t = '~';
           case "~":
           case "a":
           case "f":
