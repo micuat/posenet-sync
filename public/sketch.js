@@ -343,13 +343,15 @@ const s = p => {
             if (feedbackLoop.feedbackDelay) {
               // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.2, 1 / 60);
               // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.1, 1 / 60, 1 / 2);
-              feedbackLoop.feedbackDelay.feedback.linearRampTo(0.7, 1 / 30);
+              // feedbackLoop.feedbackDelay.feedback.linearRampTo(0.7, 1 / 30);
+              feedbackLoop.amp = 0.5;
             }
             break;
           case "b":
             if (feedbackLoop.feedbackDelay) {
               // feedbackLoop.feedbackDelay.feedback.linearRampTo(1, 1 / 60);
-              feedbackLoop.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
+              // feedbackLoop.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
+              feedbackLoop.amp = 0.0;
             }
             break;
           case "+":
@@ -400,15 +402,16 @@ class FeedbackLoop {
     this.isSetup = false;
     this.bufferSize = 1024;
     this.effectiveBufferSize = this.bufferSize;
-    this.amp = 0.5;
+    this.amp = 0.0;
   }
   setup() {
     if (this.isSetup) return;
 
     this.feedback = Tone.context.createScriptProcessor(this.bufferSize, 1, 1);
-    this.feedbackDelay = new Tone.FeedbackDelay(0.1, 0.0).connect(
+    this.feedbackDelay = new Tone.FeedbackDelay(0.1, 0.7).connect(
       this.feedback
     );
+    this.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
     this.feedback.onaudioprocess = e => {
       let a = e.inputBuffer.getChannelData(0);
       let output = e.outputBuffer.getChannelData(0);
