@@ -250,7 +250,7 @@ const s = p => {
     }
 
     let lex = code.match(/(\D+)|[+-]?(\d*[.])?\d+/gi);
-    parse(lex);
+    parse(new EmojiCharString(lex));
   };
 
   let unpack = (code, index) => {
@@ -297,13 +297,13 @@ const s = p => {
     tokens = [];
     if (l) {
       for (let i = 0; i < l.length; i++) {
-        if (isNaN(l[i])) {
-          let chars = l[i].split("");
+        if (isNaN(l.substr(i, 1))) {
+          let chars = l.substr(i, 1).split("");
           for (let j = 0; j < chars.length; j++) {
             tokens.push(chars[j]);
           }
         } else {
-          tokens.push(l[i]);
+          tokens.push(l.substr(i, 1));
         }
       }
     }

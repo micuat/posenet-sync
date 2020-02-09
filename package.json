@@ -8,7 +8,8 @@
 	},
 	"dependencies": {
 		"express": "^4.12.4",
-		"socket.io": "*"
+		"socket.io": "*",
+		"emojicharstring": "*"
 	},
 	"keywords": [
 		"node",
