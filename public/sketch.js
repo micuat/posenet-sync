@@ -5,7 +5,7 @@ const camera_speed = (0.05 * Math.PI) / 180;
 const camera_target = new THREE.Vector3(0, 0, 0);
 
 const plane_width = 1.6;
-const plane_height = (1.6 * 240) / 320;
+const plane_height = 1.6;//(1.6 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
 const numScreens = 8;
@@ -111,8 +111,10 @@ function previewFile(file) {
   reader.readAsDataURL(file);
   reader.onloadend = function() {
     if (reader.result.length > 400000) {
-      console.log("file too big! (max ~ 300kB)");
-      $("#filetoobig").fadeIn(100).fadeOut(5000);
+      console.log("file too big! (max ~ 300kB)", reader.result.length);
+      $("#filetoobig")
+        .fadeIn(100)
+        .fadeOut(5000);
       return;
     }
     let mimeType = reader.result.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
@@ -135,7 +137,9 @@ function previewFile(file) {
       // console.log(reader.result);
     } else {
       console.log("file type not supported! (only png or jpg)");
-      $("#filenotsupported").fadeIn(100).fadeOut(5000);
+      $("#filenotsupported")
+        .fadeIn(100)
+        .fadeOut(5000);
     }
   };
 }
@@ -279,7 +283,8 @@ const installPiece = ({ yRot }) => {
   plane_mesh.rotation.x = Math.PI / 2;
   plane_mesh.rotation.y = yRot;
   plane_mesh.receiveShadow = true;
-  screens.push({index: texIndex, mesh: plane_mesh});
+  plane_mesh.scale.set(1, 1, 1);
+  screens.push({ index: texIndex, mesh: plane_mesh });
   return plane_mesh;
 };
 
@@ -326,8 +331,24 @@ for (let i = 0; i < numScreens; i++) {
 }
 let t = 0;
 const render = () => {
-  for (tex of textures) tex.needsUpdate = true;
+  for (tex of textures) {
+    tex.needsUpdate = true;
+  }
+  for(let i = 0; i < textures.length; i++) {
+    if(textures[i].image != undefined) {
+      let sy = textures[screen.index].image.width / textures[screen.index].image.height;
+      console.log(screen.index, sy)
+    }
+    
+  }
 
+  for (screen of screens) {
+    if(textures[screen.index] != undefined && textures[screen.index].image != undefined) {
+      let sy = textures[screen.index].image.width / textures[screen.index].image.height;
+      screen.mesh.scale.set(1, sy, 1);
+      // console.log(screen.index, sy)
+    }
+  }
   camera_angle += camera_speed;
   camera.position.x = Math.cos(camera_angle) * camera_range;
   camera.position.y = Math.sin(camera_angle) * camera_range;
