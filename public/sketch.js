@@ -88,7 +88,6 @@ function previewFile(file) {
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
-    let uploadedTexture;
     let image = new Image();
     image.src = reader.result;
     let uploadedTexture = new THREE.Texture();
@@ -97,13 +96,12 @@ function previewFile(file) {
       uploadedTexture.needsUpdate = true;
       for (let i = 0; i < sketches.length; i++) {
         textures[i] = uploadedTexture; //new THREE.Texture(document.getElementById(sketches[i].name));
-        // if (textures[i].image.width < 256)
+        if (textures[i].image.width < 256)
         textures[i].minFilter = THREE.NearestFilter;
         plane_materials[i].map = textures[i];
-        plane_materials[i].displacementMap = textures[i];
+        // plane_materials[i].displacementMap = textures[i];
       }
-      clearInterval(checkExist);
-      render();
+      // render();
       console.log("loaded");
     };
 
@@ -232,9 +230,11 @@ const plane_materials = [];
 
 for (let i = 0; i < sketches.length; i++) {
   plane_materials[i] = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    displacementBias: 0.5,
-    displacementScale: -0.1
+    color: 0x000000,
+    displacementBias: 0,
+    displacementScale: -0
+    // displacementBias: 0.5,
+    // displacementScale: -0.1
   });
 }
 
@@ -251,13 +251,10 @@ const makeWall = ({ j, i }) => {
 
 const meshes = [];
 const installPiece = ({ yRot }) => {
-  let index = Math.floor(Math.random() * 8);
-  // let index = Math.floor(Math.random() * plane_materials.length);
+  let index = 0;//Math.floor(Math.random() * 8);
   const plane_mesh = new THREE.Mesh(
     plane_geometry,
-    index < plane_materials.length
-      ? plane_materials[index]
-      : plane_materials[index]
+    plane_materials[index]
   );
   plane_mesh.position.set(0, 0, 0);
   plane_mesh.rotation.x = Math.PI / 2;
@@ -320,6 +317,7 @@ const render = () => {
 
   stats.update();
 };
+render();
 
 const onWindowResize = () => {
   camera.aspect = window.innerWidth / window.innerHeight;
