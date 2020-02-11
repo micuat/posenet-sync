@@ -1,76 +1,73 @@
 // Camera Properties
 let camera_angle = 0;
 const camera_range = -7.5;
-const camera_speed = 0.05 * Math.PI / 180;
+const camera_speed = (0.05 * Math.PI) / 180;
 const camera_target = new THREE.Vector3(0, 0, 0);
 
 const plane_width = 1.8;
-const plane_height = 1.8 * 240 / 320;
+const plane_height = (1.8 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
 class Sketch {
-    constructor({ name }) {
-        this.name = name;
-    }
+  constructor({ name }) {
+    this.name = name;
+  }
 }
 
-const sketches = [
-    new Sketch({ name: "boredom" }),
-];
+const sketches = [new Sketch({ name: "boredom" })];
 
 // https://codepen.io/joezimjs/pen/yPWQbd
 // ************************ Drag and drop ***************** //
-let dropArea = document.getElementById("container")
+let dropArea = document.getElementById("container");
 
 // Prevent default drag behaviors
-;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-  dropArea.addEventListener(eventName, preventDefaults, false)   
-  document.body.addEventListener(eventName, preventDefaults, false)
-})
+["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false);
+  document.body.addEventListener(eventName, preventDefaults, false);
+});
 
 // Highlight drop area when item is dragged over it
-;['dragenter', 'dragover'].forEach(eventName => {
-  dropArea.addEventListener(eventName, highlight, false)
-})
-
-;['dragleave', 'drop'].forEach(eventName => {
-  dropArea.addEventListener(eventName, unhighlight, false)
-})
+["dragenter", "dragover"].forEach(eventName => {
+  dropArea.addEventListener(eventName, highlight, false);
+});
+["dragleave", "drop"].forEach(eventName => {
+  dropArea.addEventListener(eventName, unhighlight, false);
+});
 
 // Handle dropped files
-dropArea.addEventListener('drop', handleDrop, false)
+dropArea.addEventListener("drop", handleDrop, false);
 
-function preventDefaults (e) {
-  e.preventDefault()
-  e.stopPropagation()
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 function highlight(e) {
-  dropArea.classList.add('highlight')
+  dropArea.classList.add("highlight");
 }
 
 function unhighlight(e) {
-  dropArea.classList.remove('active')
+  dropArea.classList.remove("active");
 }
 
 function handleDrop(e) {
-  var dt = e.dataTransfer
-  var files = dt.files
+  var dt = e.dataTransfer;
+  var files = dt.files;
 
-  handleFiles(files)
+  handleFiles(files);
 }
 
 // let uploadProgress = []
 // let progressBar = document.getElementById('progress-bar')
 
 function initializeProgress(numFiles) {
-  console.log('init upload');
-//   progressBar.value = 0
-//   uploadProgress = []
+  console.log("init upload");
+  //   progressBar.value = 0
+  //   uploadProgress = []
 
-//   for(let i = numFiles; i > 0; i--) {
-//     uploadProgress.push(0)
-//   }
+  //   for(let i = numFiles; i > 0; i--) {
+  //     uploadProgress.push(0)
+  //   }
 }
 
 function updateProgress(fileNumber, percent) {
@@ -81,50 +78,63 @@ function updateProgress(fileNumber, percent) {
 }
 
 function handleFiles(files) {
-  files = [...files]
-  initializeProgress(files.length)
-  files.forEach(uploadFile)
-  files.forEach(previewFile)
+  files = [...files];
+  initializeProgress(files.length);
+  files.forEach(uploadFile);
+  files.forEach(previewFile);
 }
 
 function previewFile(file) {
-  let reader = new FileReader()
-  reader.readAsDataURL(file)
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
   reader.onloadend = function() {
-    // let img = document.createElement('img')
-    // img.src = reader.result
-    // document.getElementById('container').appendChild(img)
-    console.log(reader.result);
-  }
+    let uploadedTexture;
+    let image = new Image();
+    image.src = reader.result;
+    let uploadedTexture = new THREE.Texture();
+    uploadedTexture.image = image;
+    image.onload = function() {
+      uploadedTexture.needsUpdate = true;
+      for (let i = 0; i < sketches.length; i++) {
+        textures[i] = uploadedTexture; //new THREE.Texture(document.getElementById(sketches[i].name));
+        // if (textures[i].image.width < 256)
+        textures[i].minFilter = THREE.NearestFilter;
+        plane_materials[i].map = textures[i];
+        plane_materials[i].displacementMap = textures[i];
+      }
+      clearInterval(checkExist);
+      render();
+      console.log("loaded");
+    };
+
+    // console.log(reader.result);
+  };
 }
 
 function uploadFile(file, i) {
-//   var url = 'https://api.cloudinary.com/v1_1/joezimim007/image/upload'
-//   var xhr = new XMLHttpRequest()
-//   var formData = new FormData()
-//   xhr.open('POST', url, true)
-//   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
-
-//   // Update progress (can be used to show progress indicator)
-//   xhr.upload.addEventListener("progress", function(e) {
-//     updateProgress(i, (e.loaded * 100.0 / e.total) || 100)
-//   })
-
-//   xhr.addEventListener('readystatechange', function(e) {
-//     if (xhr.readyState == 4 && xhr.status == 200) {
-//       updateProgress(i, 100) // <- Add this
-//     }
-//     else if (xhr.readyState == 4 && xhr.status != 200) {
-//       // Error. Inform the user
-//     }
-//   })
-
-//   formData.append('upload_preset', 'ujpu6gyk')
-//   formData.append('file', file)
-//   xhr.send(formData)
+  //   var url = 'https://api.cloudinary.com/v1_1/joezimim007/image/upload'
+  //   var xhr = new XMLHttpRequest()
+  //   var formData = new FormData()
+  //   xhr.open('POST', url, true)
+  //   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+  //   // Update progress (can be used to show progress indicator)
+  //   xhr.upload.addEventListener("progress", function(e) {
+  //     updateProgress(i, (e.loaded * 100.0 / e.total) || 100)
+  //   })
+  //   xhr.addEventListener('readystatechange', function(e) {
+  //     if (xhr.readyState == 4 && xhr.status == 200) {
+  //       updateProgress(i, 100) // <- Add this
+  //     }
+  //     else if (xhr.readyState == 4 && xhr.status != 200) {
+  //       // Error. Inform the user
+  //     }
+  //   })
+  //   formData.append('upload_preset', 'ujpu6gyk')
+  //   formData.append('file', file)
+  //   xhr.send(formData)
 }
 
-const container = document.getElementById('container');
+const container = document.getElementById("container");
 
 // New renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -146,182 +156,173 @@ scene.fog = new THREE.FogExp2(0x000000, 0.05);
 
 let camera;
 {
-    const camera_focal = 70;
-    const camera_near = 0.1;
-    const camera_far = 50;
-    // Set some camera defaults
-    camera = new THREE.PerspectiveCamera(camera_focal, window.innerWidth / window.innerHeight, camera_near, camera_far);
-    camera.position.set(0, camera_range, 0);
-    camera.lookAt(camera_target);
+  const camera_focal = 70;
+  const camera_near = 0.1;
+  const camera_far = 50;
+  // Set some camera defaults
+  camera = new THREE.PerspectiveCamera(
+    camera_focal,
+    window.innerWidth / window.innerHeight,
+    camera_near,
+    camera_far
+  );
+  camera.position.set(0, camera_range, 0);
+  camera.lookAt(camera_target);
 }
 
 scene.add(new THREE.AmbientLight(0xffffff));
 
 // Add directional light
-const light_spot_positions = [{ x: -2, y: -2, z: 1.5 }, { x: 3, y: 1, z: 1.5 }]
+const light_spot_positions = [{ x: -2, y: -2, z: 1.5 }, { x: 3, y: 1, z: 1.5 }];
 for (let i = 0; i < 2; i++) {
-    let spot_light = new THREE.SpotLight(0xDDDDDD, 0.5);
-    spot_light.position.set(light_spot_positions[i].x, light_spot_positions[i].y, light_spot_positions[i].z);
-    spot_light.target = scene;
-    spot_light.castShadow = true;
-    spot_light.receiveShadow = true;
-    spot_light.shadow.camera.near = 0.5;
-    spot_light.shadow.mapSize.width = 1024 * 2; // default is 512
-    spot_light.shadow.mapSize.height = 1024 * 2; // default is 512	
-    scene.add(spot_light);
+  let spot_light = new THREE.SpotLight(0xdddddd, 0.5);
+  spot_light.position.set(
+    light_spot_positions[i].x,
+    light_spot_positions[i].y,
+    light_spot_positions[i].z
+  );
+  spot_light.target = scene;
+  spot_light.castShadow = true;
+  spot_light.receiveShadow = true;
+  spot_light.shadow.camera.near = 0.5;
+  spot_light.shadow.mapSize.width = 1024 * 2; // default is 512
+  spot_light.shadow.mapSize.height = 1024 * 2; // default is 512
+  scene.add(spot_light);
 }
 
-const textureVig = new THREE.TextureLoader().load("https://cdn.glitch.com/a4a75260-df79-4987-b175-2a41fddd2fa2%2Fvig.png?v=1581419125887");
-const tile_material = new THREE.MeshLambertMaterial({ color: 0xdddddd, map: textureVig });
+const textureVig = new THREE.TextureLoader().load(
+  "https://cdn.glitch.com/a4a75260-df79-4987-b175-2a41fddd2fa2%2Fvig.png?v=1581419125887"
+);
+const tile_material = new THREE.MeshLambertMaterial({
+  color: 0xdddddd,
+  map: textureVig
+});
 
 for (let i = -5; i <= 5; i++) {
-    for (let j = -5; j <= 5; j++) {
-        {
-            const plane_geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
-            const plane_mesh = new THREE.Mesh(plane_geometry, tile_material);
-            plane_mesh.position.set(j * 2, i * 2, -1);
-            plane_mesh.receiveShadow = true;
-            scene.add(plane_mesh);
-        }
+  for (let j = -5; j <= 5; j++) {
+    {
+      const plane_geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+      const plane_mesh = new THREE.Mesh(plane_geometry, tile_material);
+      plane_mesh.position.set(j * 2, i * 2, -1);
+      plane_mesh.receiveShadow = true;
+      scene.add(plane_mesh);
     }
+  }
 }
 for (let i = -2.5; i <= 2.5; i++) {
-    for (let j = -2.5; j <= 2.5; j++) {
-        if (Math.random() > 0.75) {
-            const box_geometry = new THREE.BoxGeometry(0.25, 0.25, 3);
-            const box_mesh = new THREE.Mesh(box_geometry, tile_material);
-            box_mesh.castShadow = true;
-            box_mesh.receiveShadow = true;
-            box_mesh.position.set(j * 2, i * 2, 0.5);
-            scene.add(box_mesh);
-        }
+  for (let j = -2.5; j <= 2.5; j++) {
+    if (Math.random() > 0.75) {
+      const box_geometry = new THREE.BoxGeometry(0.25, 0.25, 3);
+      const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+      box_mesh.castShadow = true;
+      box_mesh.receiveShadow = true;
+      box_mesh.position.set(j * 2, i * 2, 0.5);
+      scene.add(box_mesh);
     }
+  }
 }
 
-const plane_geometry = new THREE.PlaneGeometry(plane_width, plane_height, 128, 128);
+const plane_geometry = new THREE.PlaneGeometry(
+  plane_width,
+  plane_height,
+  128,
+  128
+);
 const plane_materials = [];
 
 for (let i = 0; i < sketches.length; i++) {
-    plane_materials[i] = new THREE.MeshStandardMaterial({ color: 0xffffff, displacementBias: 0.5, displacementScale: -0.1 });
+  plane_materials[i] = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    displacementBias: 0.5,
+    displacementScale: -0.1
+  });
 }
 
 const default_material = new THREE.MeshLambertMaterial({ color: 0xffff00ff });
 
 const makeWall = ({ j, i }) => {
-    const box_geometry = new THREE.BoxGeometry(2, 0.125, 3);
-    const box_mesh = new THREE.Mesh(box_geometry, tile_material);
-    box_mesh.castShadow = true;
-    box_mesh.receiveShadow = true;
-    box_mesh.position.set(j * 2, i * 2, 0.5);
-    return box_mesh;
-}
+  const box_geometry = new THREE.BoxGeometry(2, 0.125, 3);
+  const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+  box_mesh.castShadow = true;
+  box_mesh.receiveShadow = true;
+  box_mesh.position.set(j * 2, i * 2, 0.5);
+  return box_mesh;
+};
 
 const meshes = [];
 const installPiece = ({ yRot }) => {
-    let index = Math.floor(Math.random() * 8);
-    // let index = Math.floor(Math.random() * plane_materials.length);
-    const plane_mesh = new THREE.Mesh(plane_geometry,
-        index < plane_materials.length ? plane_materials[index] : plane_materials[index] );
-    plane_mesh.position.set(0, 0, 0);
-    plane_mesh.rotation.x = Math.PI / 2;
-    plane_mesh.rotation.y = yRot;
-    plane_mesh.receiveShadow = true;
-    return plane_mesh;
-}
+  let index = Math.floor(Math.random() * 8);
+  // let index = Math.floor(Math.random() * plane_materials.length);
+  const plane_mesh = new THREE.Mesh(
+    plane_geometry,
+    index < plane_materials.length
+      ? plane_materials[index]
+      : plane_materials[index]
+  );
+  plane_mesh.position.set(0, 0, 0);
+  plane_mesh.rotation.x = Math.PI / 2;
+  plane_mesh.rotation.y = yRot;
+  plane_mesh.receiveShadow = true;
+  return plane_mesh;
+};
 
 for (let i = -2.5; i <= 2.5; i++) {
-    for (let j = -2; j <= 2; j++) {
-        if (Math.random() > 0.75) {
-            const box_mesh = makeWall({ j, i })
-            scene.add(box_mesh);
-            box_mesh.add(installPiece({ yRot: 0 }));
-            box_mesh.add(installPiece({ yRot: -Math.PI }));
-        }
+  for (let j = -2; j <= 2; j++) {
+    if (Math.random() > 0.75) {
+      const box_mesh = makeWall({ j, i });
+      scene.add(box_mesh);
+      box_mesh.add(installPiece({ yRot: 0 }));
+      box_mesh.add(installPiece({ yRot: -Math.PI }));
     }
+  }
 }
 
 for (let i = -2; i <= 2; i++) {
-    for (let j = -2.5; j <= 2.5; j++) {
-        if (Math.random() > 0.75) {
-            const box_mesh = makeWall({ j, i })
-            box_mesh.rotation.z = -Math.PI / 2;
-            scene.add(box_mesh);
-            box_mesh.add(installPiece({ yRot: 0 }));
-            box_mesh.add(installPiece({ yRot: -Math.PI }));
-        }
+  for (let j = -2.5; j <= 2.5; j++) {
+    if (Math.random() > 0.75) {
+      const box_mesh = makeWall({ j, i });
+      box_mesh.rotation.z = -Math.PI / 2;
+      scene.add(box_mesh);
+      box_mesh.add(installPiece({ yRot: 0 }));
+      box_mesh.add(installPiece({ yRot: -Math.PI }));
     }
+  }
 }
 
 {
-    const box_geometry = new THREE.BoxGeometry(11.5, 11.5, 0.125);
-    const box_mesh = new THREE.Mesh(box_geometry, tile_material);
-    box_mesh.castShadow = true;
-    box_mesh.receiveShadow = true;
-    box_mesh.position.set(0, 0, 2);
-    scene.add(box_mesh);
+  const box_geometry = new THREE.BoxGeometry(11.5, 11.5, 0.125);
+  const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+  box_mesh.castShadow = true;
+  box_mesh.receiveShadow = true;
+  box_mesh.position.set(0, 0, 2);
+  scene.add(box_mesh);
 }
 
 // Render loop
 const textures = [];
 let t = 0;
 const render = () => {
-    for (tex of textures)
-        tex.needsUpdate = true;
+  for (tex of textures) tex.needsUpdate = true;
 
-    camera_angle += camera_speed;
-    camera.position.x = Math.cos(camera_angle) * camera_range;
-    camera.position.y = Math.sin(camera_angle) * camera_range;
-    camera.up.set(0, 0, 1);
-    camera.lookAt(camera_target);
+  camera_angle += camera_speed;
+  camera.position.x = Math.cos(camera_angle) * camera_range;
+  camera.position.y = Math.sin(camera_angle) * camera_range;
+  camera.up.set(0, 0, 1);
+  camera.lookAt(camera_target);
 
-    t = (t + 0.01);
-    // for(m of meshes)
-    //     m.morphTargetInfluences = [EasingFunctions.easeInOutCubic(Math.sin(t) * 0.5 + 0.5)];
+  t = t + 0.01;
+  // for(m of meshes)
+  //     m.morphTargetInfluences = [EasingFunctions.easeInOutCubic(Math.sin(t) * 0.5 + 0.5)];
 
-    requestAnimationFrame(render);
+  requestAnimationFrame(render);
 
-    renderer.render(scene, camera);
+  renderer.render(scene, camera);
 
-    stats.update();
+  stats.update();
 };
 
-let initialized = false;
-document.addEventListener('click', function (event) {
-    if (initialized == false) {
-        for (let i = 0; i < sketches.length; i++) {
-            const video = document.createElement('video');
-            video.id = sketches[i].name;
-            document.body.appendChild(video);
-            video.src = `./assets/${sketches[i].name}.webm`;
-            video.autoplay = true;
-            video.loop = true;
-            video.style = "display:none";
-        }
-        document.getElementById('notice').hidden = true;
-    }
-});
-
-const checkExist = setInterval(() => {
-    let failed = true;
-    for (let i = 0; i < sketches.length; i++) {
-        if (document.getElementById(sketches[i].name) != null) {
-            textures[i] = new THREE.Texture(document.getElementById(sketches[i].name));
-            // if (textures[i].image.width < 256)
-            textures[i].minFilter = THREE.NearestFilter;
-            plane_materials[i].map = textures[i];
-            plane_materials[i].displacementMap = textures[i];
-            failed = false;
-        }
-    }
-    if (failed == false) {
-        clearInterval(checkExist);
-        render();
-        console.log('loaded')
-    }
-}, 100);
-
 const onWindowResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+};
