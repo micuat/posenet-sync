@@ -9,27 +9,37 @@
         overflow: hidden;
       }
 
-      #notice, #filetoobig, #filenotsupported {
-        z-index: 1;
+      #notice,
+      #filetoobig,
+      #filenotsupported {
         position: absolute;
         top: 0px;
         left: 0px;
         color: #ffffff;
+        width: 100%;
+        height: 100%;
       }
 
       #notice {
+        z-index: 2;
         background-color: rgba(0, 0, 0, 0.85);
       }
 
-      #filetoobig, #filenotsupported {
+      #filetoobig,
+      #filenotsupported {
+        z-index: 1;
         background-color: rgba(1, 0, 0, 0.85);
       }
 
+      .inner {
+        width: 50%;
+        margin: 0 auto;
+      }
       #sketch-holder {
         z-index: 0;
         display: none;
       }
-      
+
       #container {
         position: absolute;
         width: 100%;
@@ -42,19 +52,26 @@
   <body>
     <div id="container"></div>
     <div id="notice">
-      <p>
-        Drag & drop png or jpeg image. You cannot choose which screen to upload. Please don't upload high res images!
-      </p>
+      <div class="inner">
+        <p>
+          Drag & drop small png or jpeg image on the window. (max ~ 300kB)<br />
+          You cannot choose which screen to upload...
+        </p>
+      </div>
     </div>
     <div id="filetoobig">
-      <p>
-        File too big! (max ~ 300kB)
-      </p>
+      <div class="inner">
+        <p>
+          File too big! (max ~ 300kB)
+        </p>
+      </div>
     </div>
     <div id="filenotsupported">
-      <p>
-        file type not supported! (only png or jpg please!)
-      </p>
+      <div class="inner">
+        <p>
+          file type not supported! (only png or jpg please!)
+        </p>
+      </div>
     </div>
     <script src="js/three.js"></script>
     <script src="js/libs/stats.min.js"></script>
