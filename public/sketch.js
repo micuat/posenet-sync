@@ -8,13 +8,9 @@ const plane_width = 1.8;
 const plane_height = (1.8 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
-class Sketch {
-  constructor({ name }) {
-    this.name = name;
-  }
-}
+const numScreens = 1;
 
-const sketches = [new Sketch({ name: "boredom" })];
+var socket = io();
 
 // https://codepen.io/joezimjs/pen/yPWQbd
 // ************************ Drag and drop ***************** //
@@ -94,14 +90,13 @@ function previewFile(file) {
     uploadedTexture.image = image;
     image.onload = function() {
       uploadedTexture.needsUpdate = true;
-      for (let i = 0; i < sketches.length; i++) {
+      for (let i = 0; i < numScreens; i++) {
         textures[i] = uploadedTexture; //new THREE.Texture(document.getElementById(sketches[i].name));
         // if (textures[i].image.width < 256)
         textures[i].minFilter = THREE.NearestFilter;
         plane_materials[i].map = textures[i];
-        plane_materials[i].displacementMap = textures[i];
+        // plane_materials[i].displacementMap = textures[i];
       }
-      clearInterval(checkExist);
       render();
       console.log("loaded");
     };
@@ -229,11 +224,11 @@ const plane_geometry = new THREE.PlaneGeometry(
 );
 const plane_materials = [];
 
-for (let i = 0; i < sketches.length; i++) {
+for (let i = 0; i < numScreens; i++) {
   plane_materials[i] = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    displacementBias: 0.5,
-    displacementScale: -0.1
+    // displacementBias: 0.0,
+    // displacementScale: -0.0
   });
 }
 
@@ -250,15 +245,13 @@ const makeWall = ({ j, i }) => {
 
 const meshes = [];
 const installPiece = ({ yRot }) => {
-  let index = Math.floor(Math.random() * 8);
+  let index = 0;//Math.floor(Math.random() * 8);
   // let index = Math.floor(Math.random() * plane_materials.length);
   const plane_mesh = new THREE.Mesh(
     plane_geometry,
-    index < plane_materials.length
-      ? plane_materials[index]
-      : plane_materials[index]
+    plane_materials[index]
   );
-  plane_mesh.position.set(0, 0, 0);
+  plane_mesh.position.set(0, 0.15, 0);
   plane_mesh.rotation.x = Math.PI / 2;
   plane_mesh.rotation.y = yRot;
   plane_mesh.receiveShadow = true;
@@ -301,7 +294,7 @@ for (let i = -2; i <= 2; i++) {
 const textures = [];
 let t = 0;
 const render = () => {
-  for (tex of textures) tex.needsUpdate = true;
+  // for (tex of textures) tex.needsUpdate = true;
 
   camera_angle += camera_speed;
   camera.position.x = Math.cos(camera_angle) * camera_range;
