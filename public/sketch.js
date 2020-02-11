@@ -14,7 +14,7 @@ let curTexture = 0;
 var socket = io();
 
 socket.on("new image", function(data) {
-  console.log(data.base);
+  // console.log(data.base);
   let image = new Image();
   image.src = data.base;
   let uploadedTexture = new THREE.Texture();
@@ -99,31 +99,32 @@ function handleFiles(files) {
 }
 
 function previewFile(file) {
-  let mimeType = body.profilepic.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
-  if(mimeType == 'image/png' || 'image/png')
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
-    // let image = new Image();
-    // image.src = reader.result;
-    // let uploadedTexture = new THREE.Texture();
-    // uploadedTexture.image = image;
-    socket.emit('upload image', {base: reader.result})
-    // image.onload = function() {
-    //   uploadedTexture.needsUpdate = true;
-    //   textures[curTexture] = uploadedTexture;
-    //   textures[curTexture].minFilter = THREE.NearestFilter;
-    //   plane_materials[curTexture].map = textures[curTexture];
-    //   curTexture = (curTexture + 1) % numScreens;
-    //   console.log('uploaded');
-    // };
+    let mimeType = reader.result.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
+    // console.log(mimeType);
+    if (mimeType == "image/png" || mimeType == "image/jpeg") {
+      socket.emit("upload image", { base: reader.result });
+      let image = new Image();
+      image.src = reader.result;
+      let uploadedTexture = new THREE.Texture();
+      uploadedTexture.image = image;
+      image.onload = function() {
+        uploadedTexture.needsUpdate = true;
+        textures[curTexture] = uploadedTexture;
+        textures[curTexture].minFilter = THREE.NearestFilter;
+        plane_materials[curTexture].map = textures[curTexture];
+        curTexture = (curTexture + 1) % numScreens;
+        console.log('uploaded');
+      };
 
-    // console.log(reader.result);
+      // console.log(reader.result);
+    }
   };
 }
 
-function uploadFile(file, i) {
-}
+function uploadFile(file, i) {}
 
 const container = document.getElementById("container");
 
@@ -139,7 +140,7 @@ renderer.setClearColor(0x247ba0, 1);
 container.appendChild(renderer.domElement);
 
 stats = new Stats();
-container.appendChild(stats.dom);
+// container.appendChild(stats.dom);
 
 // Create the scene
 const scene = new THREE.Scene();
@@ -232,7 +233,10 @@ for (let i = 0; i < numScreens; i++) {
 const default_material = new THREE.MeshLambertMaterial({ color: 0xffff00ff });
 
 const makeWall = ({ j, i }) => {
-  const box_geometry = Math.random() > 0.9 ? new THREE.BoxGeometry(2, 0.125, 3) : new THREE.BoxGeometry(0.125, 0.125, 3);
+  const box_geometry =
+    Math.random() > 0.9
+      ? new THREE.BoxGeometry(2, 0.125, 3)
+      : new THREE.BoxGeometry(0.125, 0.125, 3);
   const box_mesh = new THREE.Mesh(box_geometry, tile_material);
   box_mesh.castShadow = true;
   box_mesh.receiveShadow = true;
@@ -243,7 +247,7 @@ const makeWall = ({ j, i }) => {
 const meshes = [];
 let texIndex = 0;
 const installPiece = ({ yRot }) => {
-  let index = texIndex;//Math.floor(Math.random() * numScreens);
+  let index = texIndex; //Math.floor(Math.random() * numScreens);
   texIndex = (texIndex + 1) % numScreens;
   const plane_mesh = new THREE.Mesh(plane_geometry, plane_materials[index]);
   plane_mesh.position.set(0, 0.15, 0);
