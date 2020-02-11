@@ -30,10 +30,8 @@ io.on("connection", function(socket) {
   socket.on("upload image", function(data) {
     // we tell the client to execute 'new message'
     socket.broadcast.emit("upload image", data);
-    messageHistory.push({
-      username: socket.username,
-      message: data
-    });
+    imageHistory.push(data.base);
+    imageHistory.shift();
   });
 
   var addedUser = false;

@@ -4,8 +4,8 @@ const camera_range = -7.5;
 const camera_speed = (0.05 * Math.PI) / 180;
 const camera_target = new THREE.Vector3(0, 0, 0);
 
-const plane_width = 1.8;
-const plane_height = (1.8 * 240) / 320;
+const plane_width = 1.6;
+const plane_height = (1.6 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
 const numScreens = 4;
@@ -14,7 +14,7 @@ let curTexture = 0;
 var socket = io();
 
 socket.on("new image", function(data) {
-  // console.log(data.base);
+  console.log(data.base);
   let image = new Image();
   image.src = data.base;
   let uploadedTexture = new THREE.Texture();
@@ -121,26 +121,6 @@ function previewFile(file) {
 }
 
 function uploadFile(file, i) {
-  //   var url = 'https://api.cloudinary.com/v1_1/joezimim007/image/upload'
-  //   var xhr = new XMLHttpRequest()
-  //   var formData = new FormData()
-  //   xhr.open('POST', url, true)
-  //   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
-  //   // Update progress (can be used to show progress indicator)
-  //   xhr.upload.addEventListener("progress", function(e) {
-  //     updateProgress(i, (e.loaded * 100.0 / e.total) || 100)
-  //   })
-  //   xhr.addEventListener('readystatechange', function(e) {
-  //     if (xhr.readyState == 4 && xhr.status == 200) {
-  //       updateProgress(i, 100) // <- Add this
-  //     }
-  //     else if (xhr.readyState == 4 && xhr.status != 200) {
-  //       // Error. Inform the user
-  //     }
-  //   })
-  //   formData.append('upload_preset', 'ujpu6gyk')
-  //   formData.append('file', file)
-  //   xhr.send(formData)
 }
 
 const container = document.getElementById("container");
@@ -250,7 +230,7 @@ for (let i = 0; i < numScreens; i++) {
 const default_material = new THREE.MeshLambertMaterial({ color: 0xffff00ff });
 
 const makeWall = ({ j, i }) => {
-  const box_geometry = new THREE.BoxGeometry(2, 0.125, 3);
+  const box_geometry = new THREE.BoxGeometry(.125, 0.125, 3);
   const box_mesh = new THREE.Mesh(box_geometry, tile_material);
   box_mesh.castShadow = true;
   box_mesh.receiveShadow = true;
@@ -261,7 +241,6 @@ const makeWall = ({ j, i }) => {
 const meshes = [];
 const installPiece = ({ yRot }) => {
   let index = Math.floor(Math.random() * numScreens);
-  // let index = Math.floor(Math.random() * plane_materials.length);
   const plane_mesh = new THREE.Mesh(plane_geometry, plane_materials[index]);
   plane_mesh.position.set(0, 0.15, 0);
   plane_mesh.rotation.x = Math.PI / 2;
