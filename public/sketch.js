@@ -13,6 +13,10 @@ let curTexture = 0;
 
 var socket = io();
 
+socket.on("new image debug", function(data) {
+  console.log(data);
+});
+
 socket.on("new image", function(data) {
   // console.log(data.base);
   let image = new Image();
