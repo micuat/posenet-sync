@@ -31,7 +31,7 @@ io.on("connection", function(socket) {
     // we tell the client to execute 'new message'
     socket.broadcast.emit("new image", { base: data.base });
     imageHistory.push(data.base);
-    // imageHistory.shift();
+    imageHistory.shift();
   });
 
   var addedUser = false;

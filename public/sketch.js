@@ -99,22 +99,24 @@ function handleFiles(files) {
 }
 
 function previewFile(file) {
+  let mimeType = body.profilepic.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
+  if(mimeType == 'image/png' || 'image/png')
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
-    let image = new Image();
-    image.src = reader.result;
-    let uploadedTexture = new THREE.Texture();
-    uploadedTexture.image = image;
+    // let image = new Image();
+    // image.src = reader.result;
+    // let uploadedTexture = new THREE.Texture();
+    // uploadedTexture.image = image;
     socket.emit('upload image', {base: reader.result})
-    image.onload = function() {
-      uploadedTexture.needsUpdate = true;
-      textures[curTexture] = uploadedTexture;
-      textures[curTexture].minFilter = THREE.NearestFilter;
-      plane_materials[curTexture].map = textures[curTexture];
-      curTexture = (curTexture + 1) % numScreens;
-      console.log('uploaded');
-    };
+    // image.onload = function() {
+    //   uploadedTexture.needsUpdate = true;
+    //   textures[curTexture] = uploadedTexture;
+    //   textures[curTexture].minFilter = THREE.NearestFilter;
+    //   plane_materials[curTexture].map = textures[curTexture];
+    //   curTexture = (curTexture + 1) % numScreens;
+    //   console.log('uploaded');
+    // };
 
     // console.log(reader.result);
   };
