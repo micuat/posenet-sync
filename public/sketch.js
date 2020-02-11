@@ -5,7 +5,7 @@ const camera_speed = (0.05 * Math.PI) / 180;
 const camera_target = new THREE.Vector3(0, 0, 0);
 
 const plane_width = 1.6;
-const plane_height = 1.6;//(1.6 * 240) / 320;
+const plane_height = 1.6; //(1.6 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
 const numScreens = 8;
@@ -284,7 +284,7 @@ const installPiece = ({ yRot }) => {
   plane_mesh.rotation.y = yRot;
   plane_mesh.receiveShadow = true;
   plane_mesh.scale.set(1, 1, 1);
-  screens.push({ index: texIndex, mesh: plane_mesh });
+  screens.push({ index, mesh: plane_mesh });
   return plane_mesh;
 };
 
@@ -331,21 +331,29 @@ for (let i = 0; i < numScreens; i++) {
 }
 let t = 0;
 const render = () => {
-  for (tex of textures) {
-    tex.needsUpdate = true;
-  }
-  for(let i = 0; i < textures.length; i++) {
-    if(textures[i].image != undefined) {
-      let sy = textures[screen.index].image.width / textures[screen.index].image.height;
-      console.log(screen.index, sy)
-    }
-    
-  }
+  // for (tex of textures) {
+  //   tex.needsUpdate = true;
+  // }
+  // for (let i = 0; i < textures.length; i++) {
+  //   if (textures[i].image != undefined) {
+  //     let sy = textures[i].image.width / textures[i].image.height;
+  //     console.log(i, sy);
+  //   }
+  // }
 
   for (screen of screens) {
-    if(textures[screen.index] != undefined && textures[screen.index].image != undefined) {
-      let sy = textures[screen.index].image.width / textures[screen.index].image.height;
-      screen.mesh.scale.set(1, sy, 1);
+    if (
+      textures[screen.index] != undefined &&
+      textures[screen.index].image != undefined
+    ) {
+      let sy =
+        textures[screen.index].image.height /
+        textures[screen.index].image.width;
+      if (sy < 1) {
+        screen.mesh.scale.set(1, sy, 1);
+      } else {
+        screen.mesh.scale.set(1 / sy, 1, 1);
+      }
       // console.log(screen.index, sy)
     }
   }
