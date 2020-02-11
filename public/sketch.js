@@ -12,6 +12,24 @@ const numScreens = 1;
 
 var socket = io();
 
+socket.on("new image", function(data) {
+  console.log(data.base);
+  let image = new Image();
+  image.src = data.base;
+  let uploadedTexture = new THREE.Texture();
+  uploadedTexture.image = image;
+  image.onload = function() {
+    uploadedTexture.needsUpdate = true;
+    for (let i = 0; i < numScreens; i++) {
+      textures[i] = uploadedTexture;
+      textures[i].minFilter = THREE.NearestFilter;
+      plane_materials[i].map = textures[i];
+    }
+    console.log("loaded");
+  };
+  //render();
+});
+
 // https://codepen.io/joezimjs/pen/yPWQbd
 // ************************ Drag and drop ***************** //
 let dropArea = document.getElementById("container");
@@ -97,7 +115,7 @@ function previewFile(file) {
         plane_materials[i].map = textures[i];
         // plane_materials[i].displacementMap = textures[i];
       }
-      render();
+      // render();
       console.log("loaded");
     };
 
@@ -226,7 +244,7 @@ const plane_materials = [];
 
 for (let i = 0; i < numScreens; i++) {
   plane_materials[i] = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
+    color: 0xffffff
     // displacementBias: 0.0,
     // displacementScale: -0.0
   });
@@ -245,12 +263,9 @@ const makeWall = ({ j, i }) => {
 
 const meshes = [];
 const installPiece = ({ yRot }) => {
-  let index = 0;//Math.floor(Math.random() * 8);
+  let index = 0; //Math.floor(Math.random() * 8);
   // let index = Math.floor(Math.random() * plane_materials.length);
-  const plane_mesh = new THREE.Mesh(
-    plane_geometry,
-    plane_materials[index]
-  );
+  const plane_mesh = new THREE.Mesh(plane_geometry, plane_materials[index]);
   plane_mesh.position.set(0, 0.15, 0);
   plane_mesh.rotation.x = Math.PI / 2;
   plane_mesh.rotation.y = yRot;
@@ -292,9 +307,16 @@ for (let i = -2; i <= 2; i++) {
 
 // Render loop
 const textures = [];
+for (let i = 0; i < numScreens; i++) {
+  textures[i] = new THREE.TextureLoader().load(
+    "https://cdn.glitch.com/a4a75260-df79-4987-b175-2a41fddd2fa2%2Fvig.png?v=1581419125887"
+  );
+  textures[i].minFilter = THREE.NearestFilter;
+  plane_materials[i].map = textures[i];
+}
 let t = 0;
 const render = () => {
-  // for (tex of textures) tex.needsUpdate = true;
+  for (tex of textures) tex.needsUpdate = true;
 
   camera_angle += camera_speed;
   camera.position.x = Math.cos(camera_angle) * camera_range;
@@ -312,6 +334,7 @@ const render = () => {
 
   stats.update();
 };
+render();
 
 const onWindowResize = () => {
   camera.aspect = window.innerWidth / window.innerHeight;
