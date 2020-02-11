@@ -14,7 +14,11 @@ let curTexture = 0;
 var socket = io();
 
 socket.on("new image debug", function(data) {
-  console.log(JSON.parse(data.base));
+  console.log(data);
+});
+
+socket.on("new user", function(data) {
+  console.log('someone joined!');
 });
 
 socket.on("new image", function(data) {
