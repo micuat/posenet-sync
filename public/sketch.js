@@ -1,430 +1,221 @@
-// Naoto Hieda
-// https://creativecommons.org/licenses/by-sa/3.0/
+// Camera Properties
+let camera_angle = 0;
+const camera_range = -7.5;
+const camera_speed = 0.05 * Math.PI / 180;
+const camera_target = new THREE.Vector3(0, 0, 0);
 
-function midiToFreq(m) {
-  let tuning = 440;
-  if (isNaN(m) || m > 120 || m <= 0) return Math.random() * midiToFreq(100);
-  return Math.pow(2, (m - 69) / 12) * tuning;
-}
+const plane_width = 1.8;
+const plane_height = 1.8 * 240 / 320;
+const plane_position = { x: 0, y: 0, z: 0 };
 
-let replayMode = false;
-let setColorMode = 0;
-
-class ColorScheme {
-  constructor(colorString) {
-    this.colors = [];
-    {
-      let cc = colorString.split("/");
-      let cs = cc[cc.length - 1].split("-");
-      for (let i in cs) {
-        let r = parseInt("0x" + cs[i].substring(0, 2));
-        let g = parseInt("0x" + cs[i].substring(2, 4));
-        let b = parseInt("0x" + cs[i].substring(4, 6));
-        let a = undefined;
-        if (cs[i].length == 8) {
-          a = parseInt("0x" + cs[i].substring(6, 8));
-        }
-        this.colors.push({
-          r,
-          g,
-          b,
-          a
-        });
-      }
-      this.offset = 0;
+class Sketch {
+    constructor({ name }) {
+        this.name = name;
     }
-  }
-  get(i) {
-    i = Math.min(this.colors.length - 1, Math.max(0, i));
-    return this.colors[(i + this.offset) % this.colors.length];
-  }
 }
 
-var colorSchemes = [
-  new ColorScheme("https://coolors.co/3891a6-4c5b5c-fde74c-db5461-e3655b"),
-  new ColorScheme("https://coolors.co/80ffe8-eccbd9-e1eff6-97d2fb-83bcff"),
-  new ColorScheme("https://coolors.co/ff0000-00ff00-0000ff-00000000-aaaaaa"),
-  new ColorScheme("https://coolors.co/ffffff-808080-000000-333333-aaaaaa")
+const sketches = [
+    new Sketch({ name: "boredom" }),
 ];
 
-function setColor(parent, func, index, alpha) {
-  let idx = setColorMode;
-  let a = colorSchemes[idx].get(index).a;
-  if (a == undefined) a = 255;
-  if (alpha != undefined) a *= alpha;
-  parent[func](
-    colorSchemes[idx].get(index).r,
-    colorSchemes[idx].get(index).g,
-    colorSchemes[idx].get(index).b,
-    a
-  );
+const container = document.getElementById('container');
+
+// New renderer
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x247ba0, 1);
+
+// Add the renderer to the DOM
+// document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
+
+stats = new Stats();
+container.appendChild(stats.dom);
+
+// Create the scene
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, 0.05);
+
+let camera;
+{
+    const camera_focal = 70;
+    const camera_near = 0.1;
+    const camera_far = 50;
+    // Set some camera defaults
+    camera = new THREE.PerspectiveCamera(camera_focal, window.innerWidth / window.innerHeight, camera_near, camera_far);
+    camera.position.set(0, camera_range, 0);
+    camera.lookAt(camera_target);
 }
 
-// https://gist.github.com/gre/1650294/
-EasingFunctions = {
-  // no easing, no acceleration
-  linear: function(t) {
-    return t;
-  },
-  // accelerating from zero velocity
-  easeInQuad: function(t) {
-    return t * t;
-  },
-  // decelerating to zero velocity
-  easeOutQuad: function(t) {
-    return t * (2 - t);
-  },
-  // acceleration until halfway, then deceleration
-  easeInOutQuad: function(t) {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  },
-  // accelerating from zero velocity
-  easeInCubic: function(t) {
-    return t * t * t;
-  },
-  // decelerating to zero velocity
-  easeOutCubic: function(t) {
-    return --t * t * t + 1;
-  },
-  // acceleration until halfway, then deceleration
-  easeInOutCubic: function(t) {
-    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-  },
-  // accelerating from zero velocity
-  easeInQuart: function(t) {
-    return t * t * t * t;
-  },
-  // decelerating to zero velocity
-  easeOutQuart: function(t) {
-    return 1 - --t * t * t * t;
-  },
-  // acceleration until halfway, then deceleration
-  easeInOutQuart: function(t) {
-    return t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t;
-  },
-  // accelerating from zero velocity
-  easeInQuint: function(t) {
-    return t * t * t * t * t;
-  },
-  // decelerating to zero velocity
-  easeOutQuint: function(t) {
-    return 1 + --t * t * t * t * t;
-  },
-  // acceleration until halfway, then deceleration
-  easeInOutQuint: function(t) {
-    return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t;
-  }
-  // easeInElastic: function (t) { return (.04 - .04 / t) * Math.sin(25 * t) + 1 },
-  // easeOutElastic: function (t) { return .04 * t / (--t) * Math.sin(25 * t) },
-  // easeInOutElastic: function (t) { return Math.pow(2, -10*t) * Math.sin((t - .075)*(2+Math.PI)/.3)+1 },
-};
+scene.add(new THREE.AmbientLight(0xffffff));
 
-const width = 400;
-const height = 400;
-
-const s = p => {
-  const synths = {};
-  const feedbackLoop = new FeedbackLoop();
-
-  let freq = 0,
-    freqLerped = 0;
-  let pointer = 0;
-  let codeInput;
-  let tokens = [];
-
-  let isPlaying = false;
-  let prevChar = "";
-
-  let codeBase = "n";
-  let pastCommands = [];
-
-  p.setup = () => {
-    p.noCanvas();
-    p.frameRate(60);
-
-    synths["~"] = new Tone.Synth({
-      oscillator: { type: "triangle" }
-    }).toMaster();
-    synths["a"] = new Tone.AMSynth().toMaster();
-    synths["f"] = new Tone.FMSynth().toMaster();
-    synths["N"] = new Tone.Synth({
-      oscillator: { type: "sawtooth" }
-    }).toMaster();
-    synths["^"] = new Tone.Synth({
-      oscillator: { type: "triangle" }
-    }).toMaster();
-    synths["["] = new Tone.Synth({
-      oscillator: { type: "square" }
-    }).toMaster();
-    synths["p"] = new Tone.PluckSynth().toMaster();
-    synths["m"] = new Tone.MetalSynth().toMaster();
-    synths["n"] = new Tone.NoiseSynth().toMaster();
-  };
-
-  p.mouseClicked = () => {
-    p.runButtonClicked("");
-  };
-
-  let node;
-  let curPattern = 0;
-  let curDraw = 0;
-
-  let curSound = 0;
-  let waiting = false;
-  p.draw = () => {
-    let t = p.millis() * 0.001;
-
-    if (isPlaying) {
-      if (pointer < tokens.length) {
-        node = tokens[pointer];
-        execute(node);
-      } else {
-        isPlaying = false;
-
-        if (waiting == false) {
-          waiting = true;
-          setTimeout(() => {
-            waiting = false;
-            if (commandHistory.length == 0) return;
-            let start = commandHistory.length - 4;
-            if (start < 0) start = 0;
-            if (start + curSound >= commandHistory.length) curSound = 0;
-            p.runButtonClicked(commandHistory[start + curSound]);
-            let li;
-            let count = 1;
-            let messageCount = 0;
-            do {
-              li = $(`.messages li:nth-child(${count})`);
-              // if (li == undefined || li[0] == undefined || li.className == undefined) break;
-              if (li[0].className == "message") messageCount++;
-              count++;
-            } while (messageCount <= start + curSound);
-            if (li != undefined)
-              li.stop()
-                .css({ backgroundColor: "#ff0000" })
-                .animate({ backgroundColor: "#ffffff" }, 1000);
-            curSound++;
-          }, 2000);
-        }
-      }
-    } else {
-      for (const key in synths) {
-        synths[key].triggerRelease();
-      }
-      prevChar = "";
-    }
-
-    if (!isNaN(node)) {
-      pastCommands.push(freq);
-    } else {
-      pastCommands.push(node);
-    }
-    if (pastCommands.length > 15 * 15) pastCommands.shift();
-    pointer++;
-
-    const dt = -Math.cos(t * Math.PI * 0.5) * 0.5 + 0.5;
-    const du = -Math.cos(t * Math.PI * 0.1) * 0.5 + 0.5;
-  };
-
-  let isSetup = false;
-  p.runButtonClicked = code => {
-    if (code == undefined) code = "";
-    isPlaying = true;
-    if (isSetup == false) {
-      feedbackLoop.setup();
-
-      for (const key in synths) {
-        synths[key].connect(feedbackLoop.feedbackDelay);
-      }
-      isSetup = true;
-    }
-    let unbalancedBrackets =
-      code.split("<").length - 1 - (code.split(">").length - 1);
-    if (unbalancedBrackets > 0) {
-      code += ">".repeat(unbalancedBrackets);
-    }
-    code = unpack(code);
-
-    while (code.indexOf("<") > -1) {
-      code = unpack(code);
-    }
-
-    let lex = code.match(/(\D+)|[+-]?(\d*[.])?\d+/gi);
-    parse(lex);
-  };
-
-  let unpack = (code, index) => {
-    let pointer = 0;
-    let result = "";
-    let start = 0;
-    let end = 0;
-    let stack = 0;
-
-    let peek = () => {
-      return code[pointer];
-    };
-
-    let consume = () => {
-      pointer++;
-    };
-
-    while (pointer < code.length) {
-      let t = peek();
-      if (t === "<") {
-        if (stack == 0) {
-          start = pointer;
-        }
-        stack++;
-      } else if (t === ">") {
-        end = pointer;
-        stack--;
-        if (stack == 0) {
-          result += code.slice(start + 1, end).repeat(2);
-        }
-      } else {
-        if (stack == 0) {
-          result += t;
-        }
-      }
-      consume();
-    }
-
-    return result;
-  };
-
-  let parse = l => {
-    pointer = 0;
-    tokens = [];
-    if (l) {
-      for (let i = 0; i < l.length; i++) {
-        if (isNaN(l[i])) {
-          let ecs = new EmojiCharString(l[i]);
-          for (let j = 0; j < ecs.length; j++) {
-            tokens.push(ecs.substr(j, 1));
-          }
-        } else {
-          tokens.push(l[i]);
-        }
-      }
-    }
-  };
-
-  const execute = t => {
-    if (t != prevChar) {
-      if (isNaN(t)) {
-        switch (t) {
-          case "💅":
-            t = '~';
-          case "~":
-          case "a":
-          case "f":
-          case "N":
-          case "^":
-          case "[":
-          case "p":
-          case "m":
-            curSynth = t;
-            if (t == "m") {
-              synths[t].triggerAttack();
-            } else {
-              synths[t].triggerAttack(midiToFreq(freq));
-            }
-            for (const key in synths) {
-              if (key != t) {
-                synths[key].triggerRelease();
-              }
-            }
-            break;
-          case "=":
-            curSynth = "";
-            for (const key in synths) {
-              synths[key].triggerRelease();
-            }
-            break;
-          case "d":
-            if (feedbackLoop.feedbackDelay) {
-              // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.2, 1 / 60);
-              // feedbackLoop.feedbackDelay.delayTime.linearRampTo(0.1, 1 / 60, 1 / 2);
-              feedbackLoop.feedbackDelay.feedback.linearRampTo(0.7, 1 / 30);
-              feedbackLoop.amp = 0.5;
-            }
-            break;
-          case "b":
-            if (feedbackLoop.feedbackDelay) {
-              // feedbackLoop.feedbackDelay.feedback.linearRampTo(1, 1 / 60);
-              feedbackLoop.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
-              feedbackLoop.amp = 0.0;
-            }
-            break;
-          case "+":
-          case "-":
-          case "*":
-          case "/":
-          case "<":
-          case ">":
-            break;
-          default:
-            curSynth = "n";
-            for (const key in synths) {
-              synths[key].triggerRelease();
-            }
-            synths.n.triggerAttack();
-        }
-      } else {
-        if (prevChar == "+") {
-          freq += parseFloat(t);
-        } else if (prevChar == "-") {
-          freq -= parseFloat(t);
-        } else if (prevChar == "*") {
-          freq *= parseFloat(t);
-        } else if (prevChar == "/") {
-          freq /= parseFloat(t);
-        } else {
-          freq = parseFloat(t);
-        }
-
-        // if (freq == 0) freq = p.random(110);
-
-        let f = midiToFreq(freq);
-        if (isNaN(f) == false && f < 1e5) {
-          for (const key in synths) {
-            if (key != "n" && key != "p") {
-              synths[key].frequency.setValueAtTime(f);
-            }
-          }
-        }
-      }
-    }
-    prevChar = t;
-  };
-};
-
-class FeedbackLoop {
-  constructor() {
-    this.isSetup = false;
-    this.bufferSize = 1024;
-    this.effectiveBufferSize = this.bufferSize;
-    this.amp = 0.0;
-  }
-  setup() {
-    if (this.isSetup) return;
-
-    this.feedback = Tone.context.createScriptProcessor(this.bufferSize, 1, 1);
-    this.feedbackDelay = new Tone.FeedbackDelay(0.1, 0.0).connect(
-      this.feedback
-    );
-    this.feedbackDelay.feedback.linearRampTo(0, 1 / 30);
-    this.feedback.onaudioprocess = e => {
-      let a = e.inputBuffer.getChannelData(0);
-      let output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < this.bufferSize; i++) {
-        output[i] = a[i % this.effectiveBufferSize] * this.amp;
-      }
-    };
-
-    this.feedback.connect(Tone.Master);
-    this.isSetup = true;
-  }
+// Add directional light
+const light_spot_positions = [{ x: -2, y: -2, z: 1.5 }, { x: 3, y: 1, z: 1.5 }]
+for (let i = 0; i < 2; i++) {
+    let spot_light = new THREE.SpotLight(0xDDDDDD, 0.5);
+    spot_light.position.set(light_spot_positions[i].x, light_spot_positions[i].y, light_spot_positions[i].z);
+    spot_light.target = scene;
+    spot_light.castShadow = true;
+    spot_light.receiveShadow = true;
+    spot_light.shadow.camera.near = 0.5;
+    spot_light.shadow.mapSize.width = 1024 * 2; // default is 512
+    spot_light.shadow.mapSize.height = 1024 * 2; // default is 512	
+    scene.add(spot_light);
 }
 
-let myp5 = new p5(s, document.getElementById("p5sketch"));
+const textureVig = new THREE.TextureLoader().load("https://cdn.glitch.com/a4a75260-df79-4987-b175-2a41fddd2fa2%2Fvig.png?v=1581419125887");
+const tile_material = new THREE.MeshLambertMaterial({ color: 0xdddddd, map: textureVig });
+
+for (let i = -5; i <= 5; i++) {
+    for (let j = -5; j <= 5; j++) {
+        {
+            const plane_geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+            const plane_mesh = new THREE.Mesh(plane_geometry, tile_material);
+            plane_mesh.position.set(j * 2, i * 2, -1);
+            plane_mesh.receiveShadow = true;
+            scene.add(plane_mesh);
+        }
+    }
+}
+for (let i = -2.5; i <= 2.5; i++) {
+    for (let j = -2.5; j <= 2.5; j++) {
+        if (Math.random() > 0.75) {
+            const box_geometry = new THREE.BoxGeometry(0.25, 0.25, 3);
+            const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+            box_mesh.castShadow = true;
+            box_mesh.receiveShadow = true;
+            box_mesh.position.set(j * 2, i * 2, 0.5);
+            scene.add(box_mesh);
+        }
+    }
+}
+
+const plane_geometry = new THREE.PlaneGeometry(plane_width, plane_height, 128, 128);
+const plane_materials = [];
+
+for (let i = 0; i < sketches.length; i++) {
+    plane_materials[i] = new THREE.MeshStandardMaterial({ color: 0xffffff, displacementBias: 0.5, displacementScale: -0.1 });
+}
+
+const default_material = new THREE.MeshLambertMaterial({ color: 0xffff00ff });
+
+const makeWall = ({ j, i }) => {
+    const box_geometry = new THREE.BoxGeometry(2, 0.125, 3);
+    const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+    box_mesh.castShadow = true;
+    box_mesh.receiveShadow = true;
+    box_mesh.position.set(j * 2, i * 2, 0.5);
+    return box_mesh;
+}
+
+const meshes = [];
+const installPiece = ({ yRot }) => {
+    let index = Math.floor(Math.random() * 8);
+    // let index = Math.floor(Math.random() * plane_materials.length);
+    const plane_mesh = new THREE.Mesh(plane_geometry,
+        index < plane_materials.length ? plane_materials[index] : plane_materials[index] );
+    plane_mesh.position.set(0, 0, 0);
+    plane_mesh.rotation.x = Math.PI / 2;
+    plane_mesh.rotation.y = yRot;
+    plane_mesh.receiveShadow = true;
+    return plane_mesh;
+}
+
+for (let i = -2.5; i <= 2.5; i++) {
+    for (let j = -2; j <= 2; j++) {
+        if (Math.random() > 0.75) {
+            const box_mesh = makeWall({ j, i })
+            scene.add(box_mesh);
+            box_mesh.add(installPiece({ yRot: 0 }));
+            box_mesh.add(installPiece({ yRot: -Math.PI }));
+        }
+    }
+}
+
+for (let i = -2; i <= 2; i++) {
+    for (let j = -2.5; j <= 2.5; j++) {
+        if (Math.random() > 0.75) {
+            const box_mesh = makeWall({ j, i })
+            box_mesh.rotation.z = -Math.PI / 2;
+            scene.add(box_mesh);
+            box_mesh.add(installPiece({ yRot: 0 }));
+            box_mesh.add(installPiece({ yRot: -Math.PI }));
+        }
+    }
+}
+
+{
+    const box_geometry = new THREE.BoxGeometry(11.5, 11.5, 0.125);
+    const box_mesh = new THREE.Mesh(box_geometry, tile_material);
+    box_mesh.castShadow = true;
+    box_mesh.receiveShadow = true;
+    box_mesh.position.set(0, 0, 2);
+    scene.add(box_mesh);
+}
+
+// Render loop
+const textures = [];
+let t = 0;
+const render = () => {
+    for (tex of textures)
+        tex.needsUpdate = true;
+
+    camera_angle += camera_speed;
+    camera.position.x = Math.cos(camera_angle) * camera_range;
+    camera.position.y = Math.sin(camera_angle) * camera_range;
+    camera.up.set(0, 0, 1);
+    camera.lookAt(camera_target);
+
+    t = (t + 0.01);
+    // for(m of meshes)
+    //     m.morphTargetInfluences = [EasingFunctions.easeInOutCubic(Math.sin(t) * 0.5 + 0.5)];
+
+    requestAnimationFrame(render);
+
+    renderer.render(scene, camera);
+
+    stats.update();
+};
+
+let initialized = false;
+document.addEventListener('click', function (event) {
+    if (initialized == false) {
+        for (let i = 0; i < sketches.length; i++) {
+            const video = document.createElement('video');
+            video.id = sketches[i].name;
+            document.body.appendChild(video);
+            video.src = `./assets/${sketches[i].name}.webm`;
+            video.autoplay = true;
+            video.loop = true;
+            video.style = "display:none";
+        }
+        document.getElementById('notice').hidden = true;
+    }
+});
+
+const checkExist = setInterval(() => {
+    let failed = true;
+    for (let i = 0; i < sketches.length; i++) {
+        if (document.getElementById(sketches[i].name) != null) {
+            textures[i] = new THREE.Texture(document.getElementById(sketches[i].name));
+            // if (textures[i].image.width < 256)
+            textures[i].minFilter = THREE.NearestFilter;
+            plane_materials[i].map = textures[i];
+            plane_materials[i].displacementMap = textures[i];
+            failed = false;
+        }
+    }
+    if (failed == false) {
+        clearInterval(checkExist);
+        render();
+        console.log('loaded')
+    }
+}, 100);
+
+const onWindowResize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}

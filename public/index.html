@@ -1,35 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <title>p-code oreore</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <ul class="pages">
-      <li class="chat page">
-        <div class="chatArea">
-          <ul class="messages"></ul>
-        </div>
-        <input class="inputMessage" placeholder="Type here..." />
-      </li>
-      <li class="login page">
-        <div class="form">
-          <h3 class="title">What's your nickname?</h3>
-          <input class="usernameInput" type="text" maxlength="14" />
-          <p>
-            <a href="https://naotohieda.com/blog/p-code-oreore/"
-              >description found here</a
-            >
-          </p>
-        </div>
-      </li>
-    </ul>
+    <meta charset="utf-8" />
+    <title>Virtual Exhibition 003</title>
+    <style>
+      body {
+        margin: 0px;
+        overflow: hidden;
+      }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
-    <script src="https://unpkg.com/tone"></script>
-    <script src="/EmojiCharString.min.js"></script>
+      #notice {
+        z-index: 1;
+        position: absolute;
+        top: 100px;
+        left: 100px;
+        color: #ffffff;
+      }
+
+      #sketch-holder {
+        z-index: 0;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="sketch-holder"></div>
+    <div>
+      <p id="notice">
+        click to start<br />
+        (only Chrome supported)
+      </p>
+      <div id="container"></div>
+    </div>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/tone"></script> -->
+    <script src="js/three.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/libs/easing.js"></script>
+    <script src="script.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/socket.io/socket.io.js"></script>
