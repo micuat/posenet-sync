@@ -54,7 +54,8 @@ var imageHistory = [];
 db.all("SELECT * from Images", (err, rows) => {
   for(let i = 0; i < rows.length; i++) {
     imageHistory.push(rows[i].base);
-    console.log(i, rows[i].base.substr(0, 20))
+    const s = rows[i].base;
+    console.log(i, s.substring(s.length - 40, s.length))
   }
 });
 

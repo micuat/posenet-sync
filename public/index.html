@@ -9,12 +9,12 @@
         overflow: hidden;
       }
 
-      #notice {
+      #notice, #filetoobig, #filenotsupported {
         z-index: 1;
         position: absolute;
         top: 0px;
         left: 0px;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.85);
         color: #ffffff;
       }
 
@@ -37,6 +37,16 @@
     <div id="notice">
       <p>
         Drag & drop png or jpeg image. You cannot choose which screen to upload. Please don't upload high res images!
+      </p>
+    </div>
+    <div id="filetoobig">
+      <p>
+        File too big! (max ~ 300kB)
+      </p>
+    </div>
+    <div id="filenotsupported">
+      <p>
+        file type not supported! (only png or jpg please!)
       </p>
     </div>
     <script src="js/three.js"></script>

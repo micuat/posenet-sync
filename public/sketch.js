@@ -18,7 +18,7 @@ socket.on("new image debug", function(data) {
 });
 
 socket.on("new user", function(data) {
-  console.log('someone joined!');
+  console.log("someone joined!");
 });
 
 socket.on("new image", function(data) {
@@ -110,8 +110,9 @@ function previewFile(file) {
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
-    if(reader.result.length > 400000) {
-      console.log('file too big! (max ~ 300kB)');
+    if (reader.result.length > 400000) {
+      console.log("file too big! (max ~ 300kB)");
+      $("#filetoobig").fadeIn(100).fadeOut(5000);
       return;
     }
     let mimeType = reader.result.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
@@ -128,13 +129,13 @@ function previewFile(file) {
         textures[curTexture].minFilter = THREE.NearestFilter;
         plane_materials[curTexture].map = textures[curTexture];
         curTexture = (curTexture + 1) % numScreens;
-        console.log('uploaded');
+        console.log("uploaded");
       };
 
       // console.log(reader.result);
-    }
-    else {
-      console.log('file type not supported! (only png or jpg)');
+    } else {
+      console.log("file type not supported! (only png or jpg)");
+      $("#filenotsupported").fadeIn(100).fadeOut(5000);
     }
   };
 }
@@ -142,6 +143,14 @@ function previewFile(file) {
 function uploadFile(file, i) {}
 
 const container = document.getElementById("container");
+
+$("#notice").fadeOut(10000, function() {
+  // Animation complete
+});
+
+$("#filetoobig").fadeOut(1);
+
+$("#filenotsupported").fadeOut(1);
 
 // New renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -260,6 +269,7 @@ const makeWall = ({ j, i }) => {
 };
 
 const meshes = [];
+const screens = [];
 let texIndex = 0;
 const installPiece = ({ yRot }) => {
   let index = texIndex; //Math.floor(Math.random() * numScreens);
@@ -269,6 +279,7 @@ const installPiece = ({ yRot }) => {
   plane_mesh.rotation.x = Math.PI / 2;
   plane_mesh.rotation.y = yRot;
   plane_mesh.receiveShadow = true;
+  screens.push({index: texIndex, mesh: plane_mesh});
   return plane_mesh;
 };
 
