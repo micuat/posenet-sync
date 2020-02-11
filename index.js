@@ -16,7 +16,7 @@ app.use(express.static("public"));
 const fs = require("fs");
 
 // init sqlite db
-const dbFile = "./.data/sqlite.db";
+const dbFile = "./.data/sqliteImg.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
@@ -28,39 +28,18 @@ const ibase =
 db.serialize(() => {
   if (!exists) {
     db.run(
-      "CREATE TABLE Dreams (id INTEGER PRIMARY KEY AUTOINCREMENT, dream TEXT)"
+      "CREATE TABLE Images (id INTEGER PRIMARY KEY AUTOINCREMENT, base TEXT)"
     );
-    console.log("New table Dreams created!");
 
-    // insert default dreams
     db.serialize(() => {
-      db.run(
-        `INSERT INTO Dreams (dream) VALUES ('${ibase}'), ('${ibase}'), ('${ibase}'), ('${ibase}'), ('${ibase}'), ('${ibase}'), ('${ibase}'), ('${ibase}')`
-      );
-    });
-  } else {
-    console.log('Database "Dreams" ready to go!');
-    db.each("SELECT * from Dreams", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.dream}`);
+      for (let i = 0; i < 8; i++) {
+        db.run(`INSERT INTO Images (base) VALUES ('${ibase}')`);
       }
     });
-  }
-});
-
-// endpoint to add a dream to the database
-app.post("/addDream", (request, response) => {
-  console.log(`add to dreams ${request.body.dream}`);
-
-  // DISALLOW_WRITE is an ENV variable that gets reset for new projects
-  // so they can write to the database
-  if (!process.env.DISALLOW_WRITE) {
-    const cleansedDream = cleanseString(request.body.dream);
-    db.run(`INSERT INTO Dreams (dream) VALUES (?)`, cleansedDream, error => {
-      if (error) {
-        response.send({ message: "error!" });
-      } else {
-        response.send({ message: "success" });
+  } else {
+    db.each("SELECT * from Images", (err, row) => {
+      if (row) {
+        console.log(`record: ${row.base}`);
       }
     });
   }
@@ -77,7 +56,7 @@ io.on("connection", function(socket) {
   for (let i = imageHistory.length - 8; i < imageHistory.length; i++) {
     socket.emit("new image", { base: imageHistory[i] });
   }
-  db.all("SELECT * from Dreams", (err, rows) => {
+  db.all("SELECT * from Images", (err, rows) => {
     socket.emit("new image debug", { base: JSON.stringify(rows) });
   });
 
@@ -87,6 +66,8 @@ io.on("connection", function(socket) {
     socket.broadcast.emit("new image", { base: data.base });
     imageHistory.push(data.base);
     imageHistory.shift();
+
+    db.run(`INSERT INTO Images (base) VALUES (?)`, data.base, error => {});
   });
 
   var addedUser = false;

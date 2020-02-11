@@ -14,7 +14,7 @@ let curTexture = 0;
 var socket = io();
 
 socket.on("new image debug", function(data) {
-  console.log(data);
+  console.log(JSON.parse(data.base));
 });
 
 socket.on("new image", function(data) {
