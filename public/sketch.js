@@ -110,6 +110,10 @@ function previewFile(file) {
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
+    if(reader.result.length > 400000) {
+      console.log('file too big! (max ~ 300kB)');
+      return;
+    }
     let mimeType = reader.result.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
     // console.log(mimeType);
     if (mimeType == "image/png" || mimeType == "image/jpeg") {
@@ -128,6 +132,9 @@ function previewFile(file) {
       };
 
       // console.log(reader.result);
+    }
+    else {
+      console.log('file type not supported! (only png or jpg)');
     }
   };
 }
