@@ -110,16 +110,17 @@ function previewFile(file) {
   let reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onloadend = function() {
-    if (reader.result.length > 400000) {
-      console.log("file too big! (max ~ 300kB)", reader.result.length);
+    if (reader.result.length > 4000000) {
+      console.log("file too big! (max ~ 3MB)", reader.result.length);
       $("#filetoobig")
         .fadeIn(100)
         .fadeOut(5000);
       return;
     }
+    // console.log(reader.result)
     let mimeType = reader.result.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
     // console.log(mimeType);
-    if (mimeType == "image/png" || mimeType == "image/jpeg") {
+    if (mimeType == "image/png" || mimeType == "image/jpeg" || mimeType == "image/bmp") {
       socket.emit("upload image", { base: reader.result });
       let image = new Image();
       image.src = reader.result;
@@ -148,7 +149,7 @@ function uploadFile(file, i) {}
 
 const container = document.getElementById("container");
 
-$("#notice").fadeOut(10000, function() {
+$("#notice").delay(3000).fadeOut(500, function() {
   // Animation complete
 });
 
