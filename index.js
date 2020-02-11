@@ -54,6 +54,7 @@ var imageHistory = [];
 db.all("SELECT * from Images", (err, rows) => {
   for(let i = 0; i < rows.length; i++) {
     imageHistory.push(rows[i].base);
+    console.log(i, rows[i].base.substr(0, 20))
   }
 });
 
@@ -63,9 +64,9 @@ io.on("connection", function(socket) {
   for (let i = imageHistory.length - 8; i < imageHistory.length; i++) {
     socket.emit("new image", { base: imageHistory[i] });
   }
-  db.all("SELECT * from Images", (err, rows) => {
-    socket.emit("new image debug", rows);
-  });
+  // db.all("SELECT * from Images", (err, rows) => {
+  //   socket.emit("new image debug", rows);
+  // });
 
   // when the client emits 'new message', this listens and executes
   socket.on("upload image", function(data) {
