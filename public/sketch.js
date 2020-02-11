@@ -8,7 +8,7 @@ const plane_width = 1.6;
 const plane_height = (1.6 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
-const numScreens = 4;
+const numScreens = 8;
 let curTexture = 0;
 
 var socket = io();
@@ -230,7 +230,7 @@ for (let i = 0; i < numScreens; i++) {
 const default_material = new THREE.MeshLambertMaterial({ color: 0xffff00ff });
 
 const makeWall = ({ j, i }) => {
-  const box_geometry = new THREE.BoxGeometry(.125, 0.125, 3);
+  const box_geometry = Math.random() > 0.9 ? new THREE.BoxGeometry(2, 0.125, 3) : new THREE.BoxGeometry(0.125, 0.125, 3);
   const box_mesh = new THREE.Mesh(box_geometry, tile_material);
   box_mesh.castShadow = true;
   box_mesh.receiveShadow = true;
@@ -239,8 +239,10 @@ const makeWall = ({ j, i }) => {
 };
 
 const meshes = [];
+let texIndex = 0;
 const installPiece = ({ yRot }) => {
-  let index = Math.floor(Math.random() * numScreens);
+  let index = texIndex;//Math.floor(Math.random() * numScreens);
+  texIndex = (texIndex + 1) % numScreens;
   const plane_mesh = new THREE.Mesh(plane_geometry, plane_materials[index]);
   plane_mesh.position.set(0, 0.15, 0);
   plane_mesh.rotation.x = Math.PI / 2;
