@@ -8,24 +8,24 @@ const plane_width = 1.8;
 const plane_height = (1.8 * 240) / 320;
 const plane_position = { x: 0, y: 0, z: 0 };
 
-const numScreens = 1;
+const numScreens = 4;
+let curTexture = 0;
 
 var socket = io();
 
 socket.on("new image", function(data) {
-  console.log(data.base);
+  // console.log(data.base);
   let image = new Image();
   image.src = data.base;
   let uploadedTexture = new THREE.Texture();
   uploadedTexture.image = image;
   image.onload = function() {
     uploadedTexture.needsUpdate = true;
-    for (let i = 0; i < numScreens; i++) {
-      textures[i] = uploadedTexture;
-      textures[i].minFilter = THREE.NearestFilter;
-      plane_materials[i].map = textures[i];
-    }
-    console.log("loaded");
+    textures[curTexture] = uploadedTexture;
+    textures[curTexture].minFilter = THREE.NearestFilter;
+    plane_materials[curTexture].map = textures[curTexture];
+    curTexture = (curTexture + 1) % numScreens;
+    console.log("downloaded");
   };
   //render();
 });
@@ -106,17 +106,14 @@ function previewFile(file) {
     image.src = reader.result;
     let uploadedTexture = new THREE.Texture();
     uploadedTexture.image = image;
+    socket.emit('upload image', {base: reader.result})
     image.onload = function() {
       uploadedTexture.needsUpdate = true;
-      for (let i = 0; i < numScreens; i++) {
-        textures[i] = uploadedTexture; //new THREE.Texture(document.getElementById(sketches[i].name));
-        // if (textures[i].image.width < 256)
-        textures[i].minFilter = THREE.NearestFilter;
-        plane_materials[i].map = textures[i];
-        // plane_materials[i].displacementMap = textures[i];
-      }
-      // render();
-      console.log("loaded");
+      textures[curTexture] = uploadedTexture;
+      textures[curTexture].minFilter = THREE.NearestFilter;
+      plane_materials[curTexture].map = textures[curTexture];
+      curTexture = (curTexture + 1) % numScreens;
+      console.log('uploaded');
     };
 
     // console.log(reader.result);
@@ -263,7 +260,7 @@ const makeWall = ({ j, i }) => {
 
 const meshes = [];
 const installPiece = ({ yRot }) => {
-  let index = 0; //Math.floor(Math.random() * 8);
+  let index = Math.floor(Math.random() * numScreens);
   // let index = Math.floor(Math.random() * plane_materials.length);
   const plane_mesh = new THREE.Mesh(plane_geometry, plane_materials[index]);
   plane_mesh.position.set(0, 0.15, 0);
