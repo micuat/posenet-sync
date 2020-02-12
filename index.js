@@ -17,7 +17,7 @@ const fs = require("fs");
 
 // init sqlite db
 const dbFile = "./.data/sqliteImg2.db";
-//const dbFile = "./.data/sqliteImg.db";
+// const dbFile = "./.data/sqliteImg.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
