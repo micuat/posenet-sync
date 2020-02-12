@@ -16,7 +16,8 @@ app.use(express.static("public"));
 const fs = require("fs");
 
 // init sqlite db
-const dbFile = "./.data/sqliteImg.db";
+const dbFile = "./.data/sqliteImg2.db";
+//const dbFile = "./.data/sqliteImg.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
@@ -52,10 +53,10 @@ var messageHistory = [];
 
 var imageHistory = [];
 db.all("SELECT * from Images", (err, rows) => {
-  for(let i = 0; i < rows.length; i++) {
+  for(let i = rows.length-8; i < rows.length; i++) {
     imageHistory.push(rows[i].base);
     const s = rows[i].base;
-    console.log(i, s.substring(s.length - 40, s.length))
+    console.log(i, s.substring(0, 40) + '...' + s.substring(s.length - 40, s.length))
   }
 });
 
@@ -68,7 +69,7 @@ io.on("connection", function(socket) {
   // db.all("SELECT * from Images", (err, rows) => {
   //   socket.emit("new image debug", rows);
   // });
-
+  
   // when the client emits 'new message', this listens and executes
   socket.on("upload image", function(data) {
     // we tell the client to execute 'new message'
