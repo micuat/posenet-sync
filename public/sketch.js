@@ -9,20 +9,10 @@ socket.on("new user", function(data) {
 });
 
 socket.on("new image", function(data) {
-  // console.log(data.base);
-  // let image = new Image();
-  // image.src = data.base;
-  // let uploadedTexture = new THREE.Texture();
-  // uploadedTexture.image = image;
-  // image.onload = function() {
-  //   uploadedTexture.needsUpdate = true;
-  //   textures[curTexture] = uploadedTexture;
-  //   textures[curTexture].minFilter = THREE.NearestFilter;
-  //   plane_materials[curTexture].map = textures[curTexture];
-  //   curTexture = (curTexture + 1) % numScreens;
-  //   console.log("downloaded");
-  // };
-  //render();
+  if (imageWall != undefined) {
+    imageWall.attribute("src", data.base);
+  }
+  console.log("downloaded");
 });
 
 // https://codepen.io/joezimjs/pen/yPWQbd
@@ -113,9 +103,10 @@ setTimeout(() => {
         mimeType == "image/jpeg" ||
         mimeType == "image/bmp"
       ) {
-        // socket.emit("upload image", { base: reader.result });
-        let image = new Image();
-        image.src = reader.result;
+        socket.emit("upload image", { base: reader.result });
+        if (imageWall != undefined) {
+          imageWall.attribute("src", reader.result);
+        }
         console.log("uploaded");
 
         // console.log(reader.result);
@@ -141,15 +132,23 @@ $("#filetoobig").fadeOut(1);
 
 $("#filenotsupported").fadeOut(1);
 
+let imageWall;
+
 function setup() {
   noCanvas();
   console.log("p5");
+  imageWall = createElement("a-image")
+    .parent("scene")
+    .attribute("position", "0 4 -10")
+    .attribute("width", "8")
+    .attribute("height", "8");
+
   const trees = createElement("a-entity")
     .parent("scene")
-    .attribute("position", "0 0 0");
+    .attribute("position", "0 -0.5 0");
   for (let i = 0; i < 20; i++) {
     const theta = Math.random() * Math.PI * 2;
-    const r = lerp(2.5, 5, Math.random());
+    const r = lerp(7.5, 10, Math.random());
     const x = r * Math.cos(theta);
     const z = r * Math.sin(theta);
     createElement("a-gltf-model")
@@ -183,9 +182,10 @@ function setup() {
     .parent("scene")
     .attribute("position", "0 0 0");
   for (let i = 0; i < 6; i++) {
-    const X = 10;
-    const x = Math.random() * X - X / 2;
-    const z = Math.random() * X - X / 2;
+    const theta = Math.random() * Math.PI * 2;
+    const r = lerp(5, 7.5, Math.random());
+    const x = r * Math.cos(theta);
+    const z = r * Math.sin(theta);
 
     const house = createElement("a-entity")
       .parent(houses)
