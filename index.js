@@ -64,7 +64,8 @@ io.on("connection", function(socket) {
   for (let i = imageHistory.length - 1; i < imageHistory.length; i++) {
     socket.emit("new image", { base: imageHistory[i] });
   }
-  
+  console.log('new user');
+
   // when the client emits 'new message', this listens and executes
   socket.on("upload image", function(data) {
     const s = data.base;

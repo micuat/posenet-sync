@@ -134,89 +134,97 @@ $("#filenotsupported").fadeOut(1);
 
 let imageWall;
 
-function setup() {
-  noCanvas();
-  console.log("p5");
-  imageWall = createElement("a-image")
-    .parent("scene")
-    .attribute("position", "0 4 -10")
-    .attribute("width", "8")
-    .attribute("height", "8");
+const s = p => {
+  p.setup = () => {
+    p.noCanvas();
+    console.log("p5");
+    imageWall = p
+      .createElement("a-image")
+      .parent("scene")
+      .attribute("position", "0 4 -10")
+      .attribute("width", "8")
+      .attribute("height", "8");
 
-  const trees = createElement("a-entity")
-    .parent("scene")
-    .attribute("position", "0 -0.5 0");
-  for (let i = 0; i < 20; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const r = lerp(7.5, 10, Math.random());
-    const x = r * Math.cos(theta);
-    const z = r * Math.sin(theta);
-    createElement("a-gltf-model")
-      .parent(trees)
-      .attribute("src", "#tree")
-      .attribute("scale", "0.3 0.3 0.3")
-      .attribute("position", `${x} 0.5 ${z}`)
-      .attribute("rotation", `0 ${Math.random() * 360} 0`)
-      .attribute("shadow");
-  }
+    const trees = p
+      .createElement("a-entity")
+      .parent("scene")
+      .attribute("position", "0 -0.5 0");
+    for (let i = 0; i < 20; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const r = p.lerp(7.5, 10, Math.random());
+      const x = r * Math.cos(theta);
+      const z = r * Math.sin(theta);
+      p.createElement("a-gltf-model")
+        .parent(trees)
+        .attribute("src", "#tree")
+        .attribute("scale", "0.3 0.3 0.3")
+        .attribute("position", `${x} 0.5 ${z}`)
+        .attribute("rotation", `0 ${Math.random() * 360} 0`)
+        .attribute("shadow");
+    }
 
-  const bubbles = createElement("a-entity")
-    .parent("scene")
-    .attribute("position", "0 5 0");
-  for (let i = 0; i < 50; i++) {
-    const x = 15;
-    const y = 4;
-    createElement("a-sphere")
-      .parent(bubbles)
-      .attribute(
-        "position",
-        `${Math.random() * x - x / 2} ${Math.random() * y -
-          y / 2} ${Math.random() * x - x / 2}`
-      )
-      .attribute("radius", Math.random() * 1 + 0.1)
-      .attribute("color", "#dfbe99")
-      .attribute("opacity", 0.5);
-  }
+    const bubbles = p
+      .createElement("a-entity")
+      .parent("scene")
+      .attribute("position", "0 5 0");
+    for (let i = 0; i < 50; i++) {
+      const x = 15;
+      const y = 4;
+      p.createElement("a-sphere")
+        .parent(bubbles)
+        .attribute(
+          "position",
+          `${Math.random() * x - x / 2} ${Math.random() * y -
+            y / 2} ${Math.random() * x - x / 2}`
+        )
+        .attribute("radius", Math.random() * 1 + 0.1)
+        .attribute("color", "#dfbe99")
+        .attribute("opacity", 0.5);
+    }
 
-  const houses = createElement("a-entity")
-    .parent("scene")
-    .attribute("position", "0 0 0");
-  for (let i = 0; i < 6; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const r = lerp(5, 7.5, Math.random());
-    const x = r * Math.cos(theta);
-    const z = r * Math.sin(theta);
+    const houses = p
+      .createElement("a-entity")
+      .parent("scene")
+      .attribute("position", "0 0 0");
+    for (let i = 0; i < 6; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const r = p.lerp(5, 7.5, Math.random());
+      const x = r * Math.cos(theta);
+      const z = r * Math.sin(theta);
 
-    const house = createElement("a-entity")
-      .parent(houses)
-      .attribute("position", `${x} 0 ${z}`);
+      const house = p
+        .createElement("a-entity")
+        .parent(houses)
+        .attribute("position", `${x} 0 ${z}`);
 
-    createElement("a-cylinder")
-      .parent(house)
-      .attribute("radius", 0.5)
-      .attribute("height", 0.25)
-      .attribute("color", "#db5375")
-      .attribute("shadow");
-    createElement("a-cylinder")
-      .parent(house)
-      .attribute("radius", 0.25)
-      .attribute("height", 0.5)
-      .attribute("color", "#db5375")
-      .attribute("shadow");
-    createElement("a-cylinder")
-      .parent(house)
-      .attribute("position", "0 .625 0")
-      .attribute("radius", 0.05)
-      .attribute("height", 1.25)
-      .attribute("color", "#729ea1")
-      .attribute("shadow");
-    createElement("a-cone")
-      .parent(house)
-      .attribute("position", "0 1.25 0")
-      .attribute("radius-bottom", 0.85)
-      .attribute("radius-top", 0.1)
-      .attribute("height", 0.25)
-      .attribute("color", "#db5375")
-      .attribute("shadow");
-  }
-}
+      p.createElement("a-cylinder")
+        .parent(house)
+        .attribute("radius", 0.5)
+        .attribute("height", 0.25)
+        .attribute("color", "#db5375")
+        .attribute("shadow");
+      p.createElement("a-cylinder")
+        .parent(house)
+        .attribute("radius", 0.25)
+        .attribute("height", 0.5)
+        .attribute("color", "#db5375")
+        .attribute("shadow");
+      p.createElement("a-cylinder")
+        .parent(house)
+        .attribute("position", "0 .625 0")
+        .attribute("radius", 0.05)
+        .attribute("height", 1.25)
+        .attribute("color", "#729ea1")
+        .attribute("shadow");
+      p.createElement("a-cone")
+        .parent(house)
+        .attribute("position", "0 1.25 0")
+        .attribute("radius-bottom", 0.85)
+        .attribute("radius-top", 0.1)
+        .attribute("height", 0.25)
+        .attribute("color", "#db5375")
+        .attribute("shadow");
+    }
+  };
+};
+let myp5 = new p5(s);
