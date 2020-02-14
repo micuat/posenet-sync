@@ -82,5 +82,92 @@
         </p>
       </div>
     </div> -->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
+  <a-scene id="scene" background="color: #ec9192">
+    <a-assets>
+<!--       <video id="penguin" autoplay muted loop="true" src="bbcpenguin.mp4"></video> -->
+      <a-asset-item id="tree" src="https://cdn.glitch.com/90642e19-b2f0-4aab-b999-6bf18fb31829%2Ftree1.glb?v=1581719021239"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 1 0">
+      <!-- <a-cursor></a-cursor> -->
+    </a-camera>
+
+    <a-entity position="0 -4 0">
+      <!-- <a-gltf-model src="#tree" scale="0.3 0.3 0.3" ></a-gltf-model> -->
+    </a-entity>
+
+<!--     <a-video src="#penguin" width="8" height="8" position="0 4 -10"></a-video> -->
+
+    <a-light type="ambient" color="#A8A8A8" light=""></a-light>
+    <a-light type="directional" color="#FFF" intensity="0.45" position="4 2 1" light=""></a-light>
+    <a-circle position="0 0 -4" rotation="-90 0 0" radius="15" color="#b5bd89" shadow></a-circle>
+  </a-scene>
+
+  <script>
+    function setup() {
+      noCanvas();
+      console.log('p5');
+      const trees = createElement('a-entity').parent('scene').attribute('position', '0 0 0');
+      for (let i = 0; i < 20; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const r = lerp(2.5, 5, Math.random());
+        const x = r * Math.cos(theta);
+        const z = r * Math.sin(theta);
+        createElement('a-gltf-model').parent(trees)
+          .attribute('src', '#tree').attribute('scale', '0.3 0.3 0.3')
+          .attribute('position', `${x} 0.5 ${z}`)
+          .attribute('rotation', `0 ${Math.random() * 360} 0`)
+          .attribute('shadow');
+      }
+
+      const bubbles = createElement('a-entity').parent('scene').attribute('position', '0 5 0');
+      for (let i = 0; i < 50; i++) {
+        const x = 15;
+        const y = 4;
+        createElement('a-sphere').parent(bubbles)
+          .attribute('position', `${Math.random() * x - x / 2} ${Math.random() * y - y / 2} ${Math.random() * x - x / 2}`)
+          .attribute('radius', Math.random() * 1 + .1)
+          .attribute('color', '#dfbe99')
+          .attribute('opacity', 0.5);
+      }
+
+      const houses = createElement('a-entity').parent('scene').attribute('position', '0 0 0');
+      for (let i = 0; i < 6; i++) {
+        const X = 10;
+        const x = Math.random() * X - X / 2;
+        const z = Math.random() * X - X / 2;
+
+        const house = createElement('a-entity').parent(houses)
+          .attribute('position', `${x} 0 ${z}`);
+
+        createElement('a-cylinder').parent(house)
+          .attribute('radius', .5)
+          .attribute('height', .25)
+          .attribute('color', '#db5375')
+          .attribute('shadow');
+        createElement('a-cylinder').parent(house)
+          .attribute('radius', .25)
+          .attribute('height', .5)
+          .attribute('color', '#db5375')
+          .attribute('shadow');
+        createElement('a-cylinder').parent(house)
+          .attribute('position', '0 .625 0')
+          .attribute('radius', .05)
+          .attribute('height', 1.25)
+          .attribute('color', '#729ea1')
+          .attribute('shadow');
+        createElement('a-cone').parent(house)
+          .attribute('position', '0 1.25 0')
+          .attribute('radius-bottom', .85)
+          .attribute('radius-top', .1)
+          .attribute('height', .25)
+          .attribute('color', '#db5375')
+          .attribute('shadow');
+
+      }
+    }
+  </script>
   </body>
 </html>
