@@ -138,13 +138,23 @@ const s = p => {
   p.setup = () => {
     p.noCanvas();
     console.log("p5");
+    let interval = setInterval(()=>{
+      if($('scene') != undefined) {
+        clearInterval(interval);
+        createScene();
+      }
+    }, 500);
+  }
+  const createScene = () => {
+    
+    return;
     imageWall = p
       .createElement("a-image")
-      .parent("scene")
       .attribute("position", "0 4 -10")
       .attribute("width", "8")
-      .attribute("height", "8");
-
+      .attribute("height", "8")
+      // .elt.parent('#scene');
+    return;
     const trees = p
       .createElement("a-entity")
       .parent("scene")
