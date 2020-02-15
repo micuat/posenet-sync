@@ -67,7 +67,7 @@ io.on("connection", function(socket) {
   console.log('new user');
 
   // when the client emits 'new message', this listens and executes
-  socket.on("upload image", function(data) {
+  socket.on("uploading image", function(data) {
     const s = data.base;
     console.log(s.substring(0, 40) + '...' + s.substring(s.length - 40, s.length))
 

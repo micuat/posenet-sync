@@ -16,7 +16,12 @@ socket.on("new image", function(data) {
 });
 
 // https://codepen.io/joezimjs/pen/yPWQbd
-setTimeout(() => {
+let interval = setInterval(() => {
+  if ($("scene") != undefined) {
+    clearInterval(interval);
+  } else {
+    return;
+  }
   // ************************ Drag and drop ***************** //
   let dropArea = document.getElementById("scene");
 
@@ -138,22 +143,21 @@ const s = p => {
   p.setup = () => {
     p.noCanvas();
     console.log("p5");
-    let interval = setInterval(()=>{
-      if($('scene') != undefined) {
+    let interval = setInterval(() => {
+      if ($("scene") != undefined) {
         clearInterval(interval);
         createScene();
       }
     }, 500);
-  }
+  };
   const createScene = () => {
-    
-    return;
+    document.getElementById("scene").append(document.createElement("a-image"));
     imageWall = p
-      .createElement("a-image")
+      .select("a-image")
       .attribute("position", "0 4 -10")
       .attribute("width", "8")
-      .attribute("height", "8")
-      // .elt.parent('#scene');
+      .attribute("height", "8");
+    // .elt.parent('#scene');
     return;
     const trees = p
       .createElement("a-entity")
