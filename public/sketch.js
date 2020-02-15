@@ -168,32 +168,36 @@ const s = p => {
     document.getElementById("scene").append(document.createElement("a-entity"));
     const trees = p
       .select("a-entity")
-      .parent("scene")
+      .id("trees")
       .attribute("position", "0 -0.5 0");
     for (let i = 0; i < 20; i++) {
       const theta = Math.random() * Math.PI * 2;
       const r = p.lerp(7.5, 10, Math.random());
       const x = r * Math.cos(theta);
       const z = r * Math.sin(theta);
-      document.getElementById("scene").append(document.createElement("a-entity"));
-      p.createElement("a-gltf-model")
-        .parent(trees)
-        .attribute("src", "#tree")
+      document
+        .getElementById("trees")
+        .append(document.createElement("a-gltf-model"));
+      p.selectAll("a-gltf-model")
+        [p.selectAll("a-gltf-model").length - 1].attribute("src", "#tree")
         .attribute("scale", "0.3 0.3 0.3")
         .attribute("position", `${x} 0.5 ${z}`)
         .attribute("rotation", `0 ${Math.random() * 360} 0`)
         .attribute("shadow");
     }
-    return;
+    document.getElementById("scene").append(document.createElement("a-entity"));
     const bubbles = p
-      .createElement("a-entity")
-      .parent("scene")
+      .selectAll("a-entity")
+      [p.selectAll("a-entity").length - 1].id("bubbles")
       .attribute("position", "0 5 0");
     for (let i = 0; i < 50; i++) {
       const x = 15;
       const y = 4;
-      p.createElement("a-sphere")
-        .parent(bubbles)
+      document
+        .getElementById("bubbles")
+        .append(document.createElement("a-sphere"));
+      p.selectAll("a-sphere")
+        [p.selectAll("a-sphere").length - 1].parent(bubbles)
         .attribute(
           "position",
           `${Math.random() * x - x / 2} ${Math.random() * y -
@@ -204,9 +208,10 @@ const s = p => {
         .attribute("opacity", 0.5);
     }
 
+    document.getElementById("scene").append(document.createElement("a-entity"));
     const houses = p
-      .createElement("a-entity")
-      .parent("scene")
+      .selectAll("a-entity")
+      [p.selectAll("a-entity").length - 1].id("houses")
       .attribute("position", "0 0 0");
     for (let i = 0; i < 6; i++) {
       const theta = Math.random() * Math.PI * 2;
@@ -214,33 +219,44 @@ const s = p => {
       const x = r * Math.cos(theta);
       const z = r * Math.sin(theta);
 
+      document
+        .getElementById("houses")
+        .append(document.createElement("a-entity"));
       const house = p
-        .createElement("a-entity")
-        .parent(houses)
+        .selectAll("a-entity")
+        [p.selectAll("a-entity").length - 1].id("house" + i)
         .attribute("position", `${x} 0 ${z}`);
 
-      p.createElement("a-cylinder")
-        .parent(house)
-        .attribute("radius", 0.5)
+      document
+        .getElementById("house" + i)
+        .append(document.createElement("a-cylinder"));
+      p.selectAll("a-cylinder")
+        [p.selectAll("a-cylinder").length - 1].attribute("radius", 0.5)
         .attribute("height", 0.25)
         .attribute("color", "#db5375")
         .attribute("shadow");
-      p.createElement("a-cylinder")
-        .parent(house)
-        .attribute("radius", 0.25)
+      document
+        .getElementById("house" + i)
+        .append(document.createElement("a-cylinder"));
+      p.selectAll("a-cylinder")
+        [p.selectAll("a-cylinder").length - 1].attribute("radius", 0.25)
         .attribute("height", 0.5)
         .attribute("color", "#db5375")
         .attribute("shadow");
-      p.createElement("a-cylinder")
-        .parent(house)
-        .attribute("position", "0 .625 0")
+      document
+        .getElementById("house" + i)
+        .append(document.createElement("a-cylinder"));
+      p.selectAll("a-cylinder")
+        [p.selectAll("a-cylinder").length - 1].attribute("position", "0 .625 0")
         .attribute("radius", 0.05)
         .attribute("height", 1.25)
         .attribute("color", "#729ea1")
         .attribute("shadow");
-      p.createElement("a-cone")
-        .parent(house)
-        .attribute("position", "0 1.25 0")
+      document
+        .getElementById("house" + i)
+        .append(document.createElement("a-cone"));
+      p.selectAll("a-cone")
+        [p.selectAll("a-cone").length - 1].attribute("position", "0 1.25 0")
         .attribute("radius-bottom", 0.85)
         .attribute("radius-top", 0.1)
         .attribute("height", 0.25)
