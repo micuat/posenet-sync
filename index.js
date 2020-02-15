@@ -52,10 +52,13 @@ var messageHistory = [];
 
 var imageHistory = [];
 db.all("SELECT * from Images", (err, rows) => {
-  for(let i = rows.length-1; i < rows.length; i++) {
+  for (let i = rows.length - 1; i < rows.length; i++) {
     imageHistory.push(rows[i].base);
     const s = rows[i].base;
-    console.log(i, s.substring(0, 40) + '...' + s.substring(s.length - 40, s.length))
+    console.log(
+      i,
+      s.substring(0, 40) + "..." + s.substring(s.length - 40, s.length)
+    );
   }
 });
 
@@ -64,19 +67,24 @@ io.on("connection", function(socket) {
   for (let i = imageHistory.length - 1; i < imageHistory.length; i++) {
     socket.emit("new image", { base: imageHistory[i] });
   }
-  console.log('new user');
+  console.log("new user");
+  socket.on("probe", function(data) {
+    console.log("probing");
+  });
 
   // when the client emits 'new message', this listens and executes
-  socket.on("uploading image", function(data) {
+  socket.on("upload image", function(data) {
     const s = data.base;
-    console.log(s.substring(0, 40) + '...' + s.substring(s.length - 40, s.length))
+    console.log(
+      s.substring(0, 40) + "..." + s.substring(s.length - 40, s.length)
+    );
 
     socket.broadcast.emit("new image", { base: data.base });
     imageHistory.push(data.base);
     imageHistory.shift();
 
     db.run(`INSERT INTO Images (base) VALUES (?)`, data.base, error => {
-      console.log('upload ' + (error == undefined ? 'success' : error))
+      console.log("upload " + (error == undefined ? "success" : error));
     });
   });
 
@@ -84,7 +92,6 @@ io.on("connection", function(socket) {
 
   // when the client emits 'new message', this listens and executes
   socket.on("new message", function(data) {
-    
     // we tell the client to execute 'new message'
     socket.broadcast.emit("new message", {
       username: socket.username,

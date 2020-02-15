@@ -9,10 +9,15 @@ socket.on("new user", function(data) {
 });
 
 socket.on("new image", function(data) {
-  if (imageWall != undefined) {
-    imageWall.attribute("src", data.base);
-  }
-  console.log("downloaded");
+  let interval = setInterval(() => {
+    if (imageWall != undefined) {
+      clearInterval(interval);
+      imageWall.attribute("src", data.base);
+      console.log("downloaded");
+    } else {
+      return;
+    }
+  });
 });
 
 // https://codepen.io/joezimjs/pen/yPWQbd
@@ -108,11 +113,11 @@ let interval = setInterval(() => {
         mimeType == "image/jpeg" ||
         mimeType == "image/bmp"
       ) {
-        socket.emit("upload image", { base: reader.result });
         if (imageWall != undefined) {
+          socket.emit("upload image", { base: reader.result });
           imageWall.attribute("src", reader.result);
+          console.log("uploaded");
         }
-        console.log("uploaded");
 
         // console.log(reader.result);
       } else {
@@ -139,6 +144,9 @@ $("#filenotsupported").fadeOut(1);
 
 let imageWall;
 
+// setInterval(() => {
+//   socket.emit("probe", {});
+// }, 1000);
 const s = p => {
   p.setup = () => {
     p.noCanvas();
@@ -157,10 +165,9 @@ const s = p => {
       .attribute("position", "0 4 -10")
       .attribute("width", "8")
       .attribute("height", "8");
-    // .elt.parent('#scene');
-    return;
+    document.getElementById("scene").append(document.createElement("a-entity"));
     const trees = p
-      .createElement("a-entity")
+      .select("a-entity")
       .parent("scene")
       .attribute("position", "0 -0.5 0");
     for (let i = 0; i < 20; i++) {
@@ -168,6 +175,7 @@ const s = p => {
       const r = p.lerp(7.5, 10, Math.random());
       const x = r * Math.cos(theta);
       const z = r * Math.sin(theta);
+      document.getElementById("scene").append(document.createElement("a-entity"));
       p.createElement("a-gltf-model")
         .parent(trees)
         .attribute("src", "#tree")
@@ -176,7 +184,7 @@ const s = p => {
         .attribute("rotation", `0 ${Math.random() * 360} 0`)
         .attribute("shadow");
     }
-
+    return;
     const bubbles = p
       .createElement("a-entity")
       .parent("scene")
