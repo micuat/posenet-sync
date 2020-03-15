@@ -1,9 +1,5 @@
 var socket = io();
 
-socket.on("new image debug", function(data) {
-  console.log(data);
-});
-
 socket.on("new user", function(data) {
   console.log("someone joined!");
 });
@@ -132,21 +128,8 @@ let interval = setInterval(() => {
   function uploadFile(file, i) {}
 }, 500);
 
-$("#notice")
-  .delay(3000)
-  .fadeOut(500, function() {
-    // Animation complete
-  });
-
-$("#filetoobig").fadeOut(1);
-
-$("#filenotsupported").fadeOut(1);
-
 let imageWall;
 
-// setInterval(() => {
-//   socket.emit("probe", {});
-// }, 1000);
 const s = p => {
   p.setup = () => {
     p.noCanvas();
