@@ -2,33 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Utopian City</title>
+    <title>Visitor Count</title>
     <style>
       body {
         margin: 0px;
         overflow: hidden;
-      }
-
-      #notice,
-      #filetoobig,
-      #filenotsupported {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        color: #ffffff;
-        width: 100%;
-        height: 100%;
-      }
-
-      #notice {
-        z-index: 2;
-        background-color: rgba(0, 0, 0, 0.85);
-      }
-
-      #filetoobig,
-      #filenotsupported {
-        z-index: 1;
-        background-color: rgba(1, 0, 0, 0.85);
       }
 
       .inner {
@@ -63,48 +41,33 @@
   </head>
 
   <body>
-<!--     <div id="container"></div>
-    <div id="notice">
-      <div class="inner">
-        <p>
-          Drag & drop png or jpeg image here. (max ~ 3MB)<br />
-          <br />
-          <br />
-          Created by Naoto Hieda
-        </p>
-      </div>
-    </div>
-    <div id="filetoobig">
-      <div class="inner">
-        <p>
-          File too big! (max ~ 3MB)
-        </p>
-      </div>
-    </div>
-    <div id="filenotsupported">
-      <div class="inner">
-        <p>
-          file type not supported! (only png or jpg please!)
-        </p>
-      </div>
-    </div> -->
-  <a-scene id="scene" background="color: #ec9192">
-    <a-assets>
-      <a-asset-item id="tree" src="https://cdn.glitch.com/90642e19-b2f0-4aab-b999-6bf18fb31829%2Ftree1.glb?v=1581719021239"></a-asset-item>
-    </a-assets>
+    <a-scene id="scene" background="color: #ec9192" do-something-once-loaded="">
+      <a-assets>
+        <a-asset-item
+          id="tree"
+          src="https://cdn.glitch.com/90642e19-b2f0-4aab-b999-6bf18fb31829%2Ftree1.glb?v=1581719021239"
+        ></a-asset-item>
+      </a-assets>
 
-    <a-camera position="0 1 0">
-    </a-camera>
+      <a-camera position="0 1 0"> </a-camera>
 
-<!--     <a-video src="#penguin" width="8" height="8" position="0 4 -10"></a-video> -->
+      <a-light type="ambient" color="#A8A8A8" light=""></a-light>
+      <a-light
+        type="directional"
+        color="#FFF"
+        intensity="0.45"
+        position="4 2 1"
+        light=""
+      ></a-light>
+      <a-circle
+        position="0 0 -4"
+        rotation="-90 0 0"
+        radius="25"
+        color="#b5bd89"
+        shadow
+      ></a-circle>
+    </a-scene>
 
-    <a-light type="ambient" color="#A8A8A8" light=""></a-light>
-    <a-light type="directional" color="#FFF" intensity="0.45" position="4 2 1" light=""></a-light>
-    <a-circle position="0 0 -4" rotation="-90 0 0" radius="25" color="#b5bd89" shadow></a-circle>
-  </a-scene>
-
-  <script>
-
-  </script>
+    <script></script>
   </body>
 </html>
