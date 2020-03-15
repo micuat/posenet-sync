@@ -1,11 +1,5 @@
 var socket = io();
 
-let visitorCount = 0;
-socket.on("visitor count", function(data) {
-  console.log(data);
-  visitorCount = data.num;
-});
-
 function createElementUnder(tag, parent) {
   const pr = document.getElementById(parent);
   pr.append(document.createElement(tag));
@@ -18,25 +12,28 @@ AFRAME.registerComponent("do-something-once-loaded", {
       p.setup = () => {
         p.noCanvas();
         console.log("p5");
+        socket.emit("get visitor count", {});
         createScene();
       };
       const createScene = () => {
-        const textEntity = createElementUnder("a-entity", "scene");
-        textEntity.setAttribute(
-          "text",
-          `width: 2; anchor: left; color: #dfbe99; value: ${visitorCount}`);
-        textEntity.setAttribute("rotation", `0 0 0`);
-        textEntity.setAttribute(
-          "position",
-          `0 5 -1`
-        );
-        // const boxEntity = createElementUnder("a-box", "scene");
-        // boxEntity.setAttribute("color", "#db5375");
-        // boxEntity.setAttribute("rotation", `0 0 0`);
-        // boxEntity.setAttribute(
-        //   "position",
-        //   `0 1 -2`
-        // );
+        let visitorCount = 0;
+socket.on("visitor count", function(data) {
+  console.log(data);
+  visitorCount = data.num;
+
+  const textEntity = createElementUnder("a-entity", "scene");
+  textEntity.setAttribute(
+    "text",
+    `width: 10; anchor: left; color: #dfbe99; value: ${visitorCount}`
+  );
+  textEntity.setAttribute("rotation", `0 0 0`);
+  textEntity.setAttribute("position", `0 1 -2.5`);
+  const boxEntity = createElementUnder("a-box", "scene");
+  boxEntity.setAttribute("color", "#db5375");
+  boxEntity.setAttribute("rotation", `0 0 0`);
+  boxEntity.setAttribute("position", `0 1 -3`);
+});
+
         document
           .getElementById("scene")
           .append(document.createElement("a-entity"));

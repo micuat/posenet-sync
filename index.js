@@ -55,8 +55,10 @@ db.all("SELECT * from Count", (err, rows) => {
 
 io.on("connection", function(socket) {
   ibase += 1;
-  socket.emit("visitor count", {num: ibase});
-  socket.broadcast.emit("visitor count", {num: ibase});
+  socket.on("get visitor count", function() {
+    socket.emit("visitor count", { num: ibase });
+  });
+  //socket.broadcast.emit("visitor count", {num: ibase});
   db.run(`UPDATE Count SET (base) = (?)`, ibase, error => {
     console.log("upload " + (error == undefined ? "success" : error));
   });
