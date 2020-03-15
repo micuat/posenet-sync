@@ -20,22 +20,51 @@ AFRAME.registerComponent("do-something-once-loaded", {
           console.log(data);
           const visitorCount = String(data.num);
           let lastVisitorCount = String(data.num - 1);
+          if (visitorCount.length != lastVisitorCount.length) {
+            lastVisitorCount = "0" + lastVisitorCount;
+          }
 
           for (let i = 0; i < visitorCount.length; i++) {
-            const textEntity = createElementUnder("a-entity", "scene");
-            textEntity.setAttribute(
-              "text",
-              `width: 18; anchor: left; color: #dfbe99; value: ${visitorCount[i]}`
-            );
             const x = i * 1 - visitorCount.length / 2 + 0.5;
-            textEntity.setAttribute("rotation", `0 0 0`);
-            textEntity.setAttribute("position", `${x - 0.3} 1 -2.5`);
             const boxEntity = createElementUnder("a-box", "scene");
+            boxEntity.id = `count-${i}`;
             boxEntity.setAttribute("color", "#db5375");
-            if()
-            boxEntity.setAttribute("rotation", `0 0 0`);
-            boxEntity.setAttribute("position", `${x} 1 -3`);
-            boxEntity.setAttribute("width", 0.9);
+            if (visitorCount[i] != lastVisitorCount[i]) {
+              let xrot = -90;
+              boxEntity.setAttribute("rotation", `${xrot} 0 0`);
+              let handle = setInterval(() => {
+                xrot++;
+                boxEntity.setAttribute("rotation", `${xrot} 0 0`);
+                if (xrot >= 0) {
+                  clearInterval(handle);
+                }
+              }, 10);
+            } else {
+              boxEntity.setAttribute("rotation", `0 0 0`);
+            }
+            boxEntity.setAttribute("position", `${x} 1 -4`);
+            boxEntity.setAttribute("width", 0.0009);
+            {
+              const textEntity = createElementUnder("a-entity", boxEntity.id);
+              textEntity.setAttribute(
+                "text",
+                `width: 18; anchor: left; color: #dfbe99; value: ${visitorCount[i]}`
+              );
+              textEntity.setAttribute("rotation", `0 0 0`);
+              textEntity.setAttribute("position", `-0.3 0 0.5`);
+            }
+            {
+              const intermedEntity = createElementUnder("a-entity", boxEntity.id);
+              intermedEntity.id = `inter-${i}`;
+              intermedEntity.setAttribute("rotation", `-90 0 0`);
+              const textEntity = createElementUnder("a-entity", intermedEntity.id);
+              textEntity.setAttribute(
+                "text",
+                `width: 18; anchor: left; color: #dfbe99; value: ${lastVisitorCount[i]}`
+              );
+              textEntity.setAttribute("rotation", `0 0 0`);
+              textEntity.setAttribute("position", `-0.3 0 0.5`);
+            }
           }
         });
 
