@@ -24,19 +24,19 @@ AFRAME.registerComponent("do-something-once-loaded", {
         const textEntity = createElementUnder("a-entity", "scene");
         textEntity.setAttribute(
           "text",
-          `width: 2; anchor: left; color: #db5375; value: ${visitorCount}`);
+          `width: 2; anchor: left; color: #dfbe99; value: ${visitorCount}`);
         textEntity.setAttribute("rotation", `0 0 0`);
         textEntity.setAttribute(
           "position",
-          `0 1 -1`
+          `0 5 -1`
         );
-        const boxEntity = createElementUnder("a-box", "scene");
-        boxEntity.setAttribute("color", "#db5375");
-        boxEntity.setAttribute("rotation", `0 0 0`);
-        boxEntity.setAttribute(
-          "position",
-          `0 1 -2`
-        );
+        // const boxEntity = createElementUnder("a-box", "scene");
+        // boxEntity.setAttribute("color", "#db5375");
+        // boxEntity.setAttribute("rotation", `0 0 0`);
+        // boxEntity.setAttribute(
+        //   "position",
+        //   `0 1 -2`
+        // );
         document
           .getElementById("scene")
           .append(document.createElement("a-entity"));
