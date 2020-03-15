@@ -28,9 +28,15 @@ AFRAME.registerComponent("do-something-once-loaded", {
         textEntity.setAttribute("rotation", `0 0 0`);
         textEntity.setAttribute(
           "position",
-          `0 3 0`
+          `0 -1 0`
         );
-
+        const boxEntity = createElementUnder("a-entity", "scene");
+        boxEntity.setAttribute("color", "#db5375");
+        boxEntity.setAttribute("rotation", `0 0 0`);
+        boxEntity.setAttribute(
+          "position",
+          `0 -1 0`
+        );
         document
           .getElementById("scene")
           .append(document.createElement("a-entity"));
@@ -75,7 +81,7 @@ AFRAME.registerComponent("do-something-once-loaded", {
             )
             .attribute("radius", Math.random() * 1 + 0.1)
             .attribute("color", "#dfbe99")
-            .attribute("opacity", 0.5);
+            .attribute("opacity", 0.75);
         }
       };
     };
