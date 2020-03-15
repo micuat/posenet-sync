@@ -28,14 +28,14 @@ AFRAME.registerComponent("do-something-once-loaded", {
         textEntity.setAttribute("rotation", `0 0 0`);
         textEntity.setAttribute(
           "position",
-          `0 -1 0`
+          `0 1 0`
         );
-        const boxEntity = createElementUnder("a-entity", "scene");
+        const boxEntity = createElementUnder("a-box", "scene");
         boxEntity.setAttribute("color", "#db5375");
         boxEntity.setAttribute("rotation", `0 0 0`);
         boxEntity.setAttribute(
           "position",
-          `0 -1 0`
+          `0 1 2`
         );
         document
           .getElementById("scene")
