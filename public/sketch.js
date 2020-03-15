@@ -16,7 +16,12 @@ AFRAME.registerComponent("do-something-once-loaded", {
         createScene();
       };
       const createScene = () => {
+        const doms = [];
         socket.on("visitor count", function(data) {
+          for(const dom of doms) {
+            dom.id = "";
+            dom.parentNode.remove(dom);
+          }
           console.log(data);
           const visitorCount = String(data.num);
           let lastVisitorCount = String(data.num - 1);
@@ -27,25 +32,29 @@ AFRAME.registerComponent("do-something-once-loaded", {
           for (let i = 0; i < visitorCount.length; i++) {
             const x = i * 1 - visitorCount.length / 2 + 0.5;
             const boxEntity = createElementUnder("a-box", "scene");
+            doms.push(boxEntity);
             boxEntity.id = `count-${i}`;
             boxEntity.setAttribute("color", "#db5375");
             if (visitorCount[i] != lastVisitorCount[i]) {
               let xrot = -90;
               boxEntity.setAttribute("rotation", `${xrot} 0 0`);
-              let handle = setInterval(() => {
-                xrot++;
-                boxEntity.setAttribute("rotation", `${xrot} 0 0`);
-                if (xrot >= 0) {
-                  clearInterval(handle);
-                }
-              }, 10);
+              setTimeout(() => {
+                let handle = setInterval(() => {
+                  xrot++;
+                  boxEntity.setAttribute("rotation", `${xrot} 0 0`);
+                  if (xrot >= 0) {
+                    clearInterval(handle);
+                  }
+                }, 10);
+              }, 500);
             } else {
               boxEntity.setAttribute("rotation", `0 0 0`);
             }
             boxEntity.setAttribute("position", `${x} 1 -4`);
-            boxEntity.setAttribute("width", 0.0009);
+            boxEntity.setAttribute("width", 0.9);
             {
               const textEntity = createElementUnder("a-entity", boxEntity.id);
+              doms.push(textEntity);
               textEntity.setAttribute(
                 "text",
                 `width: 18; anchor: left; color: #dfbe99; value: ${visitorCount[i]}`
@@ -54,10 +63,19 @@ AFRAME.registerComponent("do-something-once-loaded", {
               textEntity.setAttribute("position", `-0.3 0 0.5`);
             }
             {
-              const intermedEntity = createElementUnder("a-entity", boxEntity.id);
+              const intermedEntity = createElementUnder(
+                "a-entity",
+                boxEntity.id
+              );
+              doms.push(intermedEntity);
               intermedEntity.id = `inter-${i}`;
-              intermedEntity.setAttribute("rotation", `-90 0 0`);
-              const textEntity = createElementUnder("a-entity", intermedEntity.id);
+              intermedEntity.setAttribute("position", `0 0 0`);
+              intermedEntity.setAttribute("rotation", `90 0 0`);
+              const textEntity = createElementUnder(
+                "a-entity",
+                intermedEntity.id
+              );
+              doms.push(textEntity);
               textEntity.setAttribute(
                 "text",
                 `width: 18; anchor: left; color: #dfbe99; value: ${lastVisitorCount[i]}`
