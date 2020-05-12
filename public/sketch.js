@@ -5,8 +5,9 @@ let poseNet;
 let poses = [];
 let friendPoses = [];
 let videoToggle;
+let col = Math.floor(Math.random() * 255);
 
-socket.on("friendPoses", function(data) {
+socket.on("friendPoses", function (data) {
   friendPoses.concat(data.poses);
 });
 
@@ -18,10 +19,13 @@ function setup() {
   poseNet = ml5.poseNet(video, modelReady);
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
-  poseNet.on("pose", function(results) {
+  poseNet.on("pose", function (results) {
     poses = results.slice(0, 1);
-    socket.emit("poses", {poses});
-    
+    if (poses.length > 0) {
+      poses[0].col = col;
+    }
+    socket.emit("poses", { poses });
+
   });
   // Hide the video element, and just show the canvas
   video.hide();
@@ -59,7 +63,7 @@ function drawKeypoints(poseObject) {
     let keypoint = pose.keypoints[j];
     // Only draw an ellipse is the pose probability is bigger than 0.2
     if (keypoint.score > 0.2) {
-      fill(255, 0, 0);
+      fill(poseObject.col, 0, 255 - poseObject.col);
       noStroke();
       ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
     }
@@ -73,7 +77,7 @@ function drawSkeleton(poseObject) {
   for (let j = 0; j < skeleton.length; j++) {
     let partA = skeleton[j][0];
     let partB = skeleton[j][1];
-    stroke(255, 0, 0);
+    stroke(poseObject.col, 0, 255 - poseObject.col);
     line(
       partA.position.x,
       partA.position.y,

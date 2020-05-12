@@ -68,7 +68,7 @@ io.on("connection", function(socket) {
     console.log("probing");
   });
   socket.on("poses", function(data) {
-    console.log(data)
+    // console.log(data)
     socket.broadcast.emit("friendPoses", data);
   });
 
