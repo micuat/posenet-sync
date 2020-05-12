@@ -8,7 +8,7 @@ let videoToggle;
 let col = Math.floor(Math.random() * 255);
 
 socket.on("friendPoses", function (data) {
-  friendPoses.concat(data.poses);
+  friendPoses = friendPoses.concat(data.poses);
 });
 
 function setup() {
@@ -31,6 +31,8 @@ function setup() {
   video.hide();
 
   videoToggle = createCheckbox("show video", true);
+
+  colorMode(HSB, 255, 255, 255);
 }
 
 function modelReady() {
@@ -42,11 +44,11 @@ function draw() {
   if (videoToggle.checked()) {
     image(video, 0, 0, width, height);
   }
-  // We can call both functions to draw all keypoints and the skeletons
   for (const pose of poses) {
     drawKeypoints(pose);
     drawSkeleton(pose);
   }
+  translate(50,0);
   for (const pose of friendPoses) {
     drawKeypoints(pose);
     drawSkeleton(pose);
@@ -63,7 +65,7 @@ function drawKeypoints(poseObject) {
     let keypoint = pose.keypoints[j];
     // Only draw an ellipse is the pose probability is bigger than 0.2
     if (keypoint.score > 0.2) {
-      fill(poseObject.col, 0, 255 - poseObject.col);
+      fill(poseObject.col, 255, 255);
       noStroke();
       ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
     }
@@ -77,7 +79,7 @@ function drawSkeleton(poseObject) {
   for (let j = 0; j < skeleton.length; j++) {
     let partA = skeleton[j][0];
     let partB = skeleton[j][1];
-    stroke(poseObject.col, 0, 255 - poseObject.col);
+    stroke(poseObject.col, 255, 255);
     line(
       partA.position.x,
       partA.position.y,
