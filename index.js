@@ -67,6 +67,10 @@ io.on("connection", function(socket) {
   socket.on("probe", function(data) {
     console.log("probing");
   });
+  socket.on("poses", function(data) {
+  console.log("pose");
+    socket.broadcast.emit("poses", data);
+  });
 
   var addedUser = false;
 
