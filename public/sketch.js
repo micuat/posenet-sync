@@ -3,12 +3,14 @@ var socket = io();
 let video;
 let poseNet;
 let poses = [];
-let friendPoses = [];
+let friendPoses = {};
 let videoToggle;
 let col = Math.floor(Math.random() * 255);
 
 socket.on("friendPoses", function (data) {
-  friendPoses = friendPoses.concat(data.poses);
+  for (const pose of data.poses) {
+    friendPoses[pose.col] = pose;
+  }
 });
 
 function setup() {
@@ -48,13 +50,11 @@ function draw() {
     drawKeypoints(pose);
     drawSkeleton(pose);
   }
-  translate(50,0);
-  for (const pose of friendPoses) {
+  for (const key of Object.keys(friendPoses)) {
+    const pose = friendPoses[key];
     drawKeypoints(pose);
     drawSkeleton(pose);
   }
-
-  friendPoses = [];
 }
 
 // A function to draw ellipses over the detected keypoints
