@@ -3,7 +3,12 @@ var socket = io();
 let video;
 let poseNet;
 let poses = [];
+let 
 let videoToggle;
+
+socket.on("poses", function(data) {
+  
+});
 
 function setup() {
   createCanvas(640, 480);
@@ -14,7 +19,8 @@ function setup() {
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on("pose", function(results) {
-    poses = results;
+    poses = results.slice(0, 1);
+    socket.emit('poses', poses)
   });
   // Hide the video element, and just show the canvas
   video.hide();
@@ -74,5 +80,3 @@ function drawSkeleton() {
     }
   }
 }
-
-socket.on("visitor count", function(data) {});
