@@ -22,7 +22,19 @@ function setup() {
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on("pose", function (results) {
-    poses = results.slice(0, 1);
+    // poses = results.slice(0, 1);
+    if (poses[0] == undefined) {
+      poses = results.slice(0, 1);
+    }
+    else if (results.length > 0) {
+      const pose = results[0];
+      for (let j = 0; j < pose.pose.keypoints.length; j++) {
+        let keypoint1 = pose.pose.keypoints[j];
+        let keypoint0 = poses[0].pose.keypoints[j];
+        keypoint0.position.x = lerp(keypoint0.position.x, keypoint1.position.x, 0.75);
+        keypoint0.position.y = lerp(keypoint0.position.y, keypoint1.position.y, 0.75);
+      }
+    }
     if (poses.length > 0) {
       poses[0].col = col;
     }
@@ -64,11 +76,11 @@ function drawKeypoints(poseObject) {
     // A keypoint is an object describing a body part (like rightArm or leftShoulder)
     let keypoint = pose.keypoints[j];
     // Only draw an ellipse is the pose probability is bigger than 0.2
-    if (keypoint.score > 0.2) {
-      fill(poseObject.col, 255, 255);
-      noStroke();
-      ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
-    }
+    // if (keypoint.score > 0.2) {
+    fill(poseObject.col, 255, 255);
+    noStroke();
+    ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
+    // }
   }
 }
 
