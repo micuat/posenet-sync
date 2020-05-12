@@ -3,11 +3,11 @@ var socket = io();
 let video;
 let poseNet;
 let poses = [];
+let videoToggle;
 
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
-  // video.size(width, height);
 
   // Create a new poseNet method with a single detection
   poseNet = ml5.poseNet(video, modelReady);
@@ -18,6 +18,8 @@ function setup() {
   });
   // Hide the video element, and just show the canvas
   video.hide();
+  
+  videoToggle = createCheckbox("show video", true);
 }
 
 function modelReady() {
@@ -25,8 +27,10 @@ function modelReady() {
 }
 
 function draw() {
-  image(video, 0, 0, width, height);
-
+  background(255);
+  if (videoToggle.value()) {
+    image(video, 0, 0, width, height);
+  }
   // We can call both functions to draw all keypoints and the skeletons
   drawKeypoints();
   drawSkeleton();
