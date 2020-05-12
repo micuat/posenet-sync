@@ -1,73 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>Visitor Count</title>
-    <style>
-      body {
-        margin: 0px;
-        overflow: hidden;
-      }
+    <meta charset="UTF-8" />
+    <title>PoseNet example using p5.js</title>
 
-      .inner {
-        width: 50%;
-        height: 50%;
-        overflow: auto;
-        margin: auto;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-      }
-      #sketch-holder {
-        z-index: 0;
-        display: none;
-      }
-
-      #container {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-color: #000;
-      }
-    </style>
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.dom.min.js"></script>
+    <script
+      src="https://unpkg.com/ml5@latest/dist/ml5.min.js"
+      type="text/javascript"
+    ></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="sketch.js"></script>
   </head>
 
   <body>
-    <a-scene id="scene" background="color: #729ea1" do-something-once-loaded="">
-      <a-assets>
-        <a-asset-item
-          id="tree"
-          src="https://cdn.glitch.com/90642e19-b2f0-4aab-b999-6bf18fb31829%2Ftree1.glb?v=1581719021239"
-        ></a-asset-item>
-      </a-assets>
-
-      <a-camera position="0 1 0"> </a-camera>
-
-      <a-light type="ambient" color="#A8A8A8" light=""></a-light>
-      <a-light
-        type="directional"
-        color="#FFF"
-        intensity="0.45"
-        position="4 2 1"
-        light=""
-      ></a-light>
-      <a-circle
-        position="0 -0.5 -4"
-        rotation="-90 0 0"
-        radius="25"
-        color="#b5bd89"
-        shadow
-      ></a-circle>
-    </a-scene>
-
-    <script></script>
+    <h1>PoseNet example using p5.js</h1>
+    <p id="status">Loading model...</p>
+    <script src="sketch.js"></script>
   </body>
 </html>
