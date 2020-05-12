@@ -68,8 +68,8 @@ io.on("connection", function(socket) {
     console.log("probing");
   });
   socket.on("poses", function(data) {
-  console.log("pose");
-    socket.broadcast.emit("poses", data);
+    console.log(data)
+    socket.broadcast.emit("friendPoses", data);
   });
 
   var addedUser = false;

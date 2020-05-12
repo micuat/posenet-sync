@@ -6,9 +6,8 @@ let poses = [];
 let friendPoses = [];
 let videoToggle;
 
-socket.on("poses", function(data) {
-  friendPoses.concat(data);
-  console.log(data)
+socket.on("friendPoses", function(data) {
+  friendPoses.concat(data.poses);
 });
 
 function setup() {
@@ -21,7 +20,8 @@ function setup() {
   // with an array every time new poses are detected
   poseNet.on("pose", function(results) {
     poses = results.slice(0, 1);
-    socket.emit("poses", poses);
+    socket.emit("poses", {poses});
+    
   });
   // Hide the video element, and just show the canvas
   video.hide();
